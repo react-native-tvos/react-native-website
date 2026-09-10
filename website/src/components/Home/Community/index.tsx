@@ -5,10 +5,6 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import useBaseUrl from '@docusaurus/useBaseUrl';
-import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
-import {ShowcaseData} from '@site/src/types';
-
 import PartnersShowcase from './PartnersShowcase';
 import Section from '../Section';
 import SectionTitle from '../SectionTitle';
@@ -16,61 +12,38 @@ import SectionTitle from '../SectionTitle';
 import styles from './styles.module.css';
 
 function Community() {
-  const {siteConfig} = useDocusaurusContext();
-  const apps = Object.values(siteConfig.customFields?.users as ShowcaseData)
-    .flat()
-    .filter(app => Boolean(app.pinned));
-
   return (
     <Section>
       <SectionTitle
-        title="Meta supported. Community driven."
+        title="Community driven."
         description={
           <>
-            React Native is being used in thousands of apps, but it's likely
+            React Native for TV tracks upstream React Native closely,
             <br />
-            you've already used it in one of these apps.
+            adding focus navigation and remote input for Apple TV and Android
+            TV.
           </>
         }
       />
-      <div className={styles.featureContainer}>
-        <ul className={styles.appList}>
-          {apps.map((app, i) => {
-            const imgSource = !app.icon.startsWith('http')
-              ? useBaseUrl('img/showcase/' + app.icon)
-              : app.icon;
-            return (
-              <li key={i} className="item">
-                {app.infoLink ? (
-                  <a
-                    href={app.infoLink}
-                    target="_blank"
-                    rel="noopener noreferrer">
-                    <img src={imgSource} alt={app.name} />
-                  </a>
-                ) : (
-                  <img src={imgSource} alt={app.name} />
-                )}
-              </li>
-            );
-          })}
-        </ul>
-      </div>
-      <a href={useBaseUrl(`showcase`)} className={styles.secondaryButton}>
-        See all featured apps
-      </a>
       <div className={styles.communityNote}>
         <p>
-          Meta released React Native in 2015 and has been maintaining it ever
-          since.
+          React Native for TV is maintained by the community as a fork of React
+          Native.
           <br />
-          Today, React Native is supported by contributions from individuals and
+          React Native itself is supported by contributions from individuals and
           companies around the world including:
         </p>
         <PartnersShowcase />
         <p>
           Additionally, our community is always shipping exciting new projects
           and expanding beyond Android and iOS with initiatives like{' '}
+          <a
+            href="https://reactnative.dev/"
+            target="_blank"
+            rel="noopener noreferrer">
+            React Native
+          </a>{' '}
+          for Android and iOS,{' '}
           <a
             href="https://microsoft.github.io/react-native-windows/"
             target="_blank"

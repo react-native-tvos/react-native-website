@@ -10,7 +10,6 @@ import type * as Preset from '@docusaurus/preset-classic';
 import type {Config} from '@docusaurus/types';
 import path from 'path';
 
-import users from './showcase.json';
 import versions from './versions.json';
 import prismThemeDark from './core/PrismThemeDark';
 import prismThemeLight from './core/PrismThemeLight';
@@ -122,9 +121,6 @@ const config: Config = {
   ],
   favicon: 'favicon.ico',
   titleDelimiter: '·',
-  customFields: {
-    users,
-  },
   i18n: {
     defaultLocale: 'en',
     locales: ['en'],
@@ -218,7 +214,6 @@ const config: Config = {
           customCss: [
             require.resolve('./src/css/customTheme.scss'),
             require.resolve('./src/css/index.scss'),
-            require.resolve('./src/css/showcase.scss'),
             require.resolve('./src/css/versions.scss'),
             require.resolve('./src/css/docs-secondary-nav.scss'),
             require.resolve('./src/css/releases.scss'),

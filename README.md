@@ -85,7 +85,6 @@ react-native-website/
     │   └── ...
     ├── docusaurus.config.ts
     ├── package.json
-    ├── showcase.json
     ├── sidebars.ts
     ├── sidebarsArchitecture.ts
     ├── sidebarsCommunity.ts
@@ -134,8 +133,6 @@ The `core` subdirectory contains JavaScript and React components that are the co
 The `src/pages` subdirectory contains the React components that make up the non-documentation pages of the site, such as the homepage.
 
 The `src/theme` subdirectory contains the swizzled React components from the Docusaurus theme.
-
-The `showcase.json` file contains the list of users that are highlighted in the React Native showcase.
 
 ## 👏 Contributing
 

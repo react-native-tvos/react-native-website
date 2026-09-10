@@ -7,11 +7,11 @@
 
 import {useEffect, useState} from 'react';
 
-import CallstackWordmark from '@site/static/img/showcase/callstack_wordmark.svg';
-import ExpoWordmark from '@site/static/img/showcase/expo-wordmark.svg';
-import InfiniteRedWordmark from '@site/static/img/showcase/infinite-red-wordmark.svg';
-import MicrosoftWordmark from '@site/static/img/showcase/microsoft-wordmark.svg';
-import SWMWordmark from '@site/static/img/showcase/swm-wordmark.svg';
+import CallstackWordmark from '@site/static/img/partners/callstack_wordmark.svg';
+import ExpoWordmark from '@site/static/img/partners/expo-wordmark.svg';
+import InfiniteRedWordmark from '@site/static/img/partners/infinite-red-wordmark.svg';
+import MicrosoftWordmark from '@site/static/img/partners/microsoft-wordmark.svg';
+import SWMWordmark from '@site/static/img/partners/swm-wordmark.svg';
 import {PartnerLink} from '@site/src/types';
 
 import styles from './styles.module.css';
