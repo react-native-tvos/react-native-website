@@ -529,3 +529,11 @@ If true, doesn't play a system sound on touch.
 | Type    |
 | ------- |
 | Boolean |
+
+## TV support <div className="label tv">TV</div>
+
+:::warning
+
+This component responds to press events but never receives focus, so it cannot be reached with a TV remote. Avoid it on Apple TV and Android TV; use [`Pressable`](pressable.md), [`TouchableOpacity`](touchableopacity.md), or [`TouchableHighlight`](touchablehighlight.md) instead, all of which are focusable.
+
+:::

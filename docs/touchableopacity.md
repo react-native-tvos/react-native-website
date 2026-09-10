@@ -3,6 +3,8 @@ id: touchableopacity
 title: TouchableOpacity
 ---
 
+import TVFocusProps from './_tv-generated/tv-focus-props.md';
+
 :::tip
 If you're looking for a more extensive and future-proof way to handle touch-based input, check out the [Pressable](pressable.md) API.
 :::
@@ -149,3 +151,13 @@ TV next focus up (see documentation for the View component).
 ### `ref`
 
 A ref setter that will be assigned an [element node](element-nodes) when mounted.
+
+## TV focus props <div className="label tv">TV</div>
+
+On Apple TV and Android TV this component is focusable, and the remote's directional pad moves focus between it and its siblings. `onFocus` and `onBlur` fire as focus arrives and leaves, `onPress` fires when the select button is pressed, and `onPressIn` and `onPressOut` bracket that press. Use `onFocus` and `onBlur` to render the focused state — on a screen viewed from across a room it needs to be unmistakable.
+
+The focus engine picks the next view geometrically. The `nextFocus*` props override that choice for a given direction. On Apple TV the override is only consulted when a focusable view already exists in that direction.
+
+<TVFocusProps />
+
+See [Building for TV](building-for-tv.md) for the wider focus model, and [`TVFocusGuideView`](tvfocusguideview.md) for reaching controls the engine would otherwise skip.

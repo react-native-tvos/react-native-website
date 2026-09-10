@@ -36,6 +36,7 @@ const OUT_DIR = path.join(REPO_ROOT, 'docs', '_tv-generated');
 
 const TV = 'Libraries/Components/TV';
 const SCROLL_VIEW = 'Libraries/Components/ScrollView/ScrollView.d.ts';
+const PRESSABLE = 'Libraries/Components/Pressable/Pressable.d.ts';
 
 type Target = {
   /** Output basename under docs/_tv-generated/. */
@@ -48,6 +49,13 @@ type Target = {
   only?: string[];
   /** Heading shown above the table. */
   title: string;
+  /**
+   * Where to take descriptions for members the primary declaration documents
+   * with no doc comment. Some declarations carry the authoritative prop set
+   * but no prose, while another declaration upstream documents the same names.
+   * Both are generated output, so prose still cannot drift from source.
+   */
+  descriptionsFrom?: {file: string; decl: string};
 };
 
 const TARGETS: Target[] = [
@@ -56,6 +64,15 @@ const TARGETS: Target[] = [
     file: `${TV}/TVViewPropTypes.d.ts`,
     decl: 'TVViewProps',
     title: 'TV props',
+  },
+  {
+    // Pressable declares its own TVProps: the focus props a focusable control
+    // accepts, including the focus/blur handlers that TVViewProps omits.
+    out: 'tv-focus-props',
+    file: PRESSABLE,
+    decl: 'TVProps',
+    title: 'TV focus props',
+    descriptionsFrom: {file: `${TV}/TVViewPropTypes.d.ts`, decl: 'TVViewProps'},
   },
   {
     out: 'tv-parallax-properties',
@@ -74,6 +91,12 @@ const TARGETS: Target[] = [
     file: `${TV}/TVFocusGuideView.d.ts`,
     decl: 'TVFocusGuideViewImperativeMethods',
     title: 'TVFocusGuideView methods',
+  },
+  {
+    out: 'tv-text-scroll-view-props',
+    file: `${TV}/TVTextScrollView.d.ts`,
+    decl: 'TVTextScrollView',
+    title: 'TVTextScrollView props',
   },
   {
     out: 'tv-event-control-methods',
@@ -123,8 +146,17 @@ function cell(text: string): string {
     .trim();
 }
 
+/** Matches the badge markup and casing used by the hand-written docs. */
+const PLATFORM_LABELS: Record<string, string> = {
+  ios: 'iOS',
+  android: 'Android',
+  tv: 'TV',
+};
+
 function platformBadges(platforms: string[]): string {
-  return platforms.map(p => `<div className="label ${p}">${p}</div>`).join(' ');
+  return platforms
+    .map(p => `<div className="label ${p}">${PLATFORM_LABELS[p] ?? p}</div>`)
+    .join(' ');
 }
 
 function describe(member: Member): string {
@@ -222,11 +254,37 @@ async function main() {
       sources.set(target.file, readGeneratedType(repo, target.file));
     }
     const source = sources.get(target.file)!;
-    const members = extractMembers(
+    let members = extractMembers(
       parse(target.file, source.text),
       target.decl,
       target.only
     );
+    if (target.descriptionsFrom) {
+      const from = target.descriptionsFrom;
+      if (!sources.has(from.file)) {
+        sources.set(from.file, readGeneratedType(repo, from.file));
+      }
+      const documented = new Map(
+        extractMembers(
+          parse(from.file, sources.get(from.file)!.text),
+          from.decl
+        ).map(m => [m.name, m])
+      );
+      members = members.map(member => {
+        const fallback = documented.get(member.name);
+        if (member.description || !fallback?.description) {
+          return member;
+        }
+        return {
+          ...member,
+          description: fallback.description,
+          platforms: member.platforms.length
+            ? member.platforms
+            : fallback.platforms,
+          deprecated: member.deprecated ?? fallback.deprecated,
+        };
+      });
+    }
     members.forEach(m => documented.add(m.name));
 
     const formatted = await prettier.format(renderTable(target, members), {
@@ -286,8 +344,6 @@ async function main() {
  * and `_default` suffixes. The generated side is authoritative, so these are
  * deliberately the suffixed names:
  *
- * - `TVViewProps` is generated; `TVProps` is the deprecated manual type, which
- *   still lists onFocus/onBlur and omits autoFocus/destinations/scrollSnap*.
  * - `TVRemoteEvent_2` is generated; `TVRemoteEvent` is the deprecated manual
  *   type, which still carries a `target` field the fork no longer emits.
  * - `TVEventControl_default` holds the members; `TVEventControl` is a
@@ -297,6 +353,7 @@ async function main() {
  */
 const SNAPSHOT_AUDIT = [
   'TVViewProps',
+  'TVProps',
   'TVFocusGuideViewProps',
   'TVParallaxPropertiesType',
   'TVRemoteEvent_2',

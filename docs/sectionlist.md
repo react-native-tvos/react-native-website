@@ -365,3 +365,9 @@ An object that identifies the data to be rendered for a given section.
 | renderItem                                                | function           | Optionally define an arbitrary item renderer for this section, overriding the default [`renderItem`](sectionlist#renderitem) for the list.                          |
 | ItemSeparatorComponent                                    | component, element | Optionally define an arbitrary item separator for this section, overriding the default [`ItemSeparatorComponent`](sectionlist#itemseparatorcomponent) for the list. |
 | keyExtractor                                              | function           | Optionally define an arbitrary key extractor for this section, overriding the default [`keyExtractor`](sectionlist#keyextractor).                                   |
+
+## TV focus behavior <div className="label tv">TV</div>
+
+On Apple TV and Android TV, this component wraps its contents in a [`TVFocusGuideView`](tvfocusguideview.md) with the `trapFocus*` props set according to the list's orientation. This keeps focus inside the list while rows are still virtualized, instead of letting it escape into whatever happens to be rendered at the time. Focus leaves the list once it reaches the first or last item.
+
+You do not need to add your own focus guide around the list. Rows should be focusable — a [`Pressable`](pressable.md) or [`TouchableOpacity`](touchableopacity.md) — since focus is what scrolls the list.
