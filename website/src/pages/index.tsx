@@ -15,18 +15,12 @@ import Home from '../components/Home';
 const Index = () => {
   return (
     <Layout
-      description="A framework for building native apps for Android, iOS, and more using React"
+      description="A framework for building native apps for Apple TV and Android TV using React"
       wrapperClassName="homepage">
       <Head>
-        <title>React Native · Learn once, write anywhere</title>
-        <meta
-          property="og:title"
-          content="React Native · Learn once, write anywhere"
-        />
-        <meta
-          property="twitter:title"
-          content="React Native · Learn once, write anywhere"
-        />
+        <title>React Native for TV</title>
+        <meta property="og:title" content="React Native for TV" />
+        <meta property="twitter:title" content="React Native for TV" />
       </Head>
       <Home />
     </Layout>

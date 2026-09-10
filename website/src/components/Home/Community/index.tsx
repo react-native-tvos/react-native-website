@@ -94,7 +94,7 @@ function Community() {
         </p>
       </div>
       <a
-        href="https://github.com/react/react-native/blob/main/ECOSYSTEM.md"
+        href="https://github.com/react-native-tvos/react-native-tvos/blob/main/ECOSYSTEM.md"
         target="_blank"
         rel="noopener noreferrer"
         className={styles.secondaryButton}>

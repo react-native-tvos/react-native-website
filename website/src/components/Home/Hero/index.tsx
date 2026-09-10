@@ -21,19 +21,12 @@ function Hero() {
   return (
     <div className={styles.container}>
       <div className={styles.socialLinks}>
-        <a
-          className="twitter-follow-button"
-          href={`https://twitter.com/reactnative?ref_src=twsrc%5Etfw`}
-          data-show-count="false"
-          data-size="large">
-          Follow @reactnative
-        </a>
         <GitHubButton
-          href="https://github.com/facebook/react-native"
+          href="https://github.com/react-native-tvos/react-native-tvos"
           data-icon="octicon-star"
           data-size="large"
           data-color-scheme={colorMode}
-          aria-label="Star facebook/react-native on GitHub">
+          aria-label="Star react-native-tvos/react-native-tvos on GitHub">
           Star
         </GitHubButton>
       </div>
@@ -50,8 +43,10 @@ function Hero() {
       </div>
       <div className={styles.content}>
         <Logo />
-        <h1 className={styles.title}>React Native</h1>
-        <h2 className={styles.subtitle}>Learn once, write anywhere.</h2>
+        <h1 className={styles.title}>React Native for TV</h1>
+        <h2 className={styles.subtitle}>
+          Apple TV and Android TV, with React.
+        </h2>
         <div className={styles.buttonContainer}>
           <a href="/docs/environment-setup" className={styles.primaryButton}>
             Get Started

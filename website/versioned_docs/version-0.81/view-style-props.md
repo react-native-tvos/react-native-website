@@ -4,7 +4,7 @@ title: View Style Props
 ---
 
 import ExperimentalAPIWarning from './\_experimental-api-warning.mdx';
-import {getCoreBranchNameForCurrentVersion} from '@site/src/getCoreBranchNameForCurrentVersion';
+import {getTvBranchNameForCurrentVersion} from '@site/src/getTvBranchNameForCurrentVersion';
 
 ### Example
 
@@ -91,8 +91,8 @@ export default App;
 
 More complex examples of usage can be found in the RNTester app (with `PlatformColor` supports):
 
-- <a href={`https://github.com/facebook/react-native/blob/${getCoreBranchNameForCurrentVersion()}/packages/rn-tester/js/examples/LinearGradient/LinearGradientExample.js`}>LinearGradientExample.js</a>
-- <a href={`https://github.com/facebook/react-native/blob/${getCoreBranchNameForCurrentVersion()}/packages/rn-tester/js/examples/RadialGradient/RadialGradientExample.js`}>RadialGradientExample.js</a>
+- <a href={`https://github.com/react-native-tvos/react-native-tvos/blob/${getTvBranchNameForCurrentVersion()}/packages/rn-tester/js/examples/LinearGradient/LinearGradientExample.js`}>LinearGradientExample.js</a>
+- <a href={`https://github.com/react-native-tvos/react-native-tvos/blob/${getTvBranchNameForCurrentVersion()}/packages/rn-tester/js/examples/RadialGradient/RadialGradientExample.js`}>RadialGradientExample.js</a>
 
 | Type                                                                                                                                                                                               |
 | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

@@ -1,7 +1,7 @@
 {
-  "name": "React Native · Learn once, write anywhere",
-  "short_name": "React Native",
-  "description": "A framework for building native apps for Android, iOS, and more using React",
+  "name": "React Native for TV",
+  "short_name": "React Native TV",
+  "description": "A framework for building native apps for Apple TV and Android TV using React",
   "theme_color": "#20232a",
   "background_color": "#20232a",
   "display": "minimal-ui",
@@ -11,34 +11,59 @@
   "id": "./index.html",
   "shortcuts": [
     {
-      "name": "Docummentation",
+      "name": "Documentation",
       "short_name": "Docs",
       "url": "/docs/getting-started",
-      "icons": [{ "src": "img/pwa/manifest-icon-192.png", "sizes": "192x192" }]
+      "icons": [
+        {
+          "src": "img/pwa/manifest-icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
     },
     {
       "name": "Core Components",
       "short_name": "Components",
       "url": "/docs/components-and-apis",
-      "icons": [{ "src": "img/pwa/manifest-icon-192.png", "sizes": "192x192" }]
+      "icons": [
+        {
+          "src": "img/pwa/manifest-icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
     },
     {
       "name": "Core APIs",
       "short_name": "APIs",
       "url": "/docs/accessibilityinfo",
-      "icons": [{ "src": "img/pwa/manifest-icon-192.png", "sizes": "192x192" }]
+      "icons": [
+        {
+          "src": "img/pwa/manifest-icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
     },
     {
       "name": "Community",
       "short_name": "Community",
       "url": "/community/overview",
-      "icons": [{ "src": "img/pwa/manifest-icon-192.png", "sizes": "192x192" }]
+      "icons": [
+        {
+          "src": "img/pwa/manifest-icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
     },
     {
       "name": "Blog",
       "short_name": "Blog",
       "url": "/blog",
-      "icons": [{ "src": "img/pwa/manifest-icon-192.png", "sizes": "192x192" }]
+      "icons": [
+        {
+          "src": "img/pwa/manifest-icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
     }
   ],
   "icons": [

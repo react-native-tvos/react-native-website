@@ -23,7 +23,24 @@ const isProductionDeployment =
   (!!process.env.VERCEL && process.env.VERCEL_ENV === 'production');
 
 const lastVersion = versions[0];
-const copyright = `Copyright © Meta Platforms, Inc.`;
+const copyright = `Copyright © react-native-tvos contributors.`;
+
+/**
+ * PLACEHOLDER: the deploy target for this site is not yet decided.
+ * When it is, update this constant and `website/static/CNAME`.
+ */
+const SITE_URL = 'https://tv.example.com';
+
+/** Upstream repository that this site documents. */
+const TV_REPO_URL = 'https://github.com/react-native-tvos/react-native-tvos';
+
+/** Repository holding this site's source, used for "Edit this page" links. */
+const SITE_REPO_EDIT_URL =
+  'https://github.com/react-native-tvos/react-native-website/edit/main';
+
+const SITE_NAME = 'React Native for TV';
+const SITE_DESCRIPTION =
+  'A framework for building native apps for Apple TV and Android TV using React';
 
 export type EditUrlButton = {
   label: string;
@@ -36,8 +53,7 @@ const commonDocsOptions: PluginContentDocs.Options = {
   showLastUpdateAuthor: false,
   showLastUpdateTime: true,
   editUrl: (options => {
-    const baseUrl =
-      'https://github.com/facebook/react-native-website/edit/main';
+    const baseUrl = SITE_REPO_EDIT_URL;
     const nextReleasePath = `docs/${options.docPath}`;
     const isNextRelease = options.version === 'current';
     const buttons: EditUrlButton[] = [
@@ -85,12 +101,11 @@ const config: Config = {
     faster: (process.env.DOCUSAURUS_FASTER ?? 'true') === 'true',
   },
 
-  title: 'React Native',
-  tagline:
-    'A framework for building native apps for Android, iOS, and more using React',
-  organizationName: 'Meta Platforms, Inc.',
-  projectName: 'react-native',
-  url: 'https://reactnative.dev',
+  title: SITE_NAME,
+  tagline: SITE_DESCRIPTION,
+  organizationName: 'react-native-tvos',
+  projectName: 'react-native-tvos',
+  url: SITE_URL,
   baseUrl: '/',
   clientModules: [
     './modules/snackPlayerInitializer.ts',
@@ -102,10 +117,6 @@ const config: Config = {
       src: 'https://cdn.jsdelivr.net/npm/focus-visible@5.2.0/dist/focus-visible.min.js',
       defer: true,
     },
-    {
-      src: 'https://widget.surveymonkey.com/collect/website/js/tRaiETqnLgj758hTBazgd8ryO5qrZo8Exadq9qmt1wtm4_2FdZGEAKHDFEt_2BBlwwM4.js',
-      defer: true,
-    },
     {src: 'https://snack.expo.dev/embed.js', defer: true},
     {src: 'https://platform.twitter.com/widgets.js', async: true},
   ],
@@ -113,7 +124,6 @@ const config: Config = {
   titleDelimiter: '·',
   customFields: {
     users,
-    facebookAppId: '1677033832619985',
   },
   i18n: {
     defaultLocale: 'en',
@@ -129,12 +139,11 @@ const config: Config = {
       innerHTML: JSON.stringify({
         '@context': 'https://schema.org/',
         '@type': 'WebPage',
-        '@id': 'https://reactnative.dev/',
-        url: 'https://reactnative.dev/',
-        name: 'React Native · Learn once, write anywhere',
-        description:
-          'A framework for building native apps for Android, iOS, and more using React',
-        logo: 'https://reactnative.dev/img/pwa/manifest-icon-192.png',
+        '@id': `${SITE_URL}/`,
+        url: `${SITE_URL}/`,
+        name: SITE_NAME,
+        description: SITE_DESCRIPTION,
+        logo: `${SITE_URL}/img/pwa/manifest-icon-192.png`,
         inLanguage: 'en-US',
       }),
     },
@@ -145,18 +154,17 @@ const config: Config = {
       },
       innerHTML: JSON.stringify({
         '@type': 'WebSite',
-        '@id': 'https://reactnative.dev/',
-        url: 'https://reactnative.dev/',
-        name: 'React Native · Learn once, write anywhere',
-        description:
-          'A framework for building native apps for Android, iOS, and more using React',
-        publisher: 'Meta Platforms, Inc.',
+        '@id': `${SITE_URL}/`,
+        url: `${SITE_URL}/`,
+        name: SITE_NAME,
+        description: SITE_DESCRIPTION,
+        publisher: 'react-native-tvos contributors',
         potentialAction: [
           {
             '@type': 'SearchAction',
             target: {
               '@type': 'EntryPoint',
-              urlTemplate: 'https://reactnative.dev/search?q={query}',
+              urlTemplate: `${SITE_URL}/search?q={query}`,
             },
             'query-input': {
               '@type': 'PropertyValueSpecification',
@@ -215,9 +223,6 @@ const config: Config = {
             require.resolve('./src/css/docs-secondary-nav.scss'),
             require.resolve('./src/css/releases.scss'),
           ],
-        },
-        gtag: {
-          trackingID: 'G-58L13S6BDP',
         },
       } satisfies Preset.Options,
     ],
@@ -337,9 +342,8 @@ const config: Config = {
     [
       '@signalwire/docusaurus-plugin-llms-txt',
       {
-        siteTitle: 'React Native · Learn once, write anywhere',
-        siteDescription:
-          'A framework for building native apps for Android, iOS, and more using React',
+        siteTitle: SITE_NAME,
+        siteDescription: SITE_DESCRIPTION,
         depth: 3,
         includeOrder: [
           '/docs/getting-started',
@@ -360,7 +364,6 @@ const config: Config = {
           '/docs/**',
           '/architecture/**',
           '/community/**',
-          '/showcase/**',
           '/contributing/**',
           '/versions',
           '/blog/**',
@@ -430,7 +433,7 @@ const config: Config = {
       ],
     },
     navbar: {
-      title: 'React Native',
+      title: SITE_NAME,
       logo: {
         src: 'img/header_logo.svg',
         alt: '',
@@ -469,17 +472,12 @@ const config: Config = {
           docsPluginId: 'community',
         },
         {
-          to: '/showcase',
-          label: 'Showcase',
-          position: 'right',
-        },
-        {
           to: '/blog',
           label: 'Blog',
           position: 'right',
         },
         {
-          href: 'https://github.com/facebook/react-native',
+          href: TV_REPO_URL,
           'aria-label': 'GitHub repository',
           position: 'right',
           className: 'navbar-github-link',
@@ -515,10 +513,6 @@ const config: Config = {
           title: 'Participate',
           items: [
             {
-              label: 'Showcase',
-              to: 'showcase',
-            },
-            {
               label: 'Contributing',
               to: 'contributing/overview',
             },
@@ -528,7 +522,7 @@ const config: Config = {
             },
             {
               label: 'Code of Conduct',
-              href: 'https://github.com/react/react-native/blob/main/CODE_OF_CONDUCT.md',
+              href: `${TV_REPO_URL}/blob/main/CODE_OF_CONDUCT.md`,
             },
           ],
         },
@@ -540,16 +534,12 @@ const config: Config = {
               to: 'blog',
             },
             {
-              label: 'X',
-              href: 'https://x.com/reactnative',
-            },
-            {
-              label: 'Bluesky',
-              href: 'https://bsky.app/profile/reactnative.dev',
-            },
-            {
               label: 'GitHub',
-              href: 'https://github.com/facebook/react-native',
+              href: TV_REPO_URL,
+            },
+            {
+              label: 'Issues',
+              href: `${TV_REPO_URL}/issues`,
             },
           ],
         },
@@ -561,44 +551,31 @@ const config: Config = {
               href: 'https://react.dev/',
             },
             {
+              label: 'React Native',
+              href: 'https://reactnative.dev/',
+            },
+            {
               label: 'Packages Directory',
               href: 'https://reactnative.directory/',
-            },
-            {
-              label: 'Privacy Policy',
-              href: 'https://opensource.fb.com/legal/privacy/',
-            },
-            {
-              label: 'Terms of Service',
-              href: 'https://opensource.fb.com/legal/terms/',
             },
           ],
         },
       ],
-      logo: {
-        alt: 'Meta Open Source Logo',
-        src: 'img/oss_logo.svg',
-        href: 'https://opensource.fb.com/',
-      },
       copyright,
     },
-    algolia: {
-      appId: '8TDSE0OHGQ',
-      apiKey: '83cd239c72f9f8b0ed270a04b1185288',
-      indexName: 'react-native-v2',
-      contextualSearch: true,
-    },
+    // TODO: search is disabled until a DocSearch index exists for this site.
+    // The previous config pointed at Meta's 'react-native-v2' index, which
+    // returns reactnative.dev results.
     metadata: [
       {
         property: 'og:image',
-        content: 'https://reactnative.dev/img/logo-share.png',
+        content: `${SITE_URL}/img/logo-share.png`,
       },
       {name: 'twitter:card', content: 'summary_large_image'},
       {
         name: 'twitter:image',
-        content: 'https://reactnative.dev/img/logo-share.png',
+        content: `${SITE_URL}/img/logo-share.png`,
       },
-      {name: 'twitter:site', content: '@reactnative'},
       {name: 'mobile-web-app-capable', content: 'yes'},
     ],
     mermaid: {
