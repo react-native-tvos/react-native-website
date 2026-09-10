@@ -170,9 +170,9 @@ function documentedInCommittedPartials(): Set<string> {
       );
     }
     for (const line of fs.readFileSync(file, 'utf8').split('\n')) {
-      const name = /^\|\s*`([A-Za-z_$][\w$]*)`/.exec(line);
+      const name = /^\|\s*`([A-Za-z_$][\w$]*)`/.exec(line)?.[1];
       if (name) {
-        names.add(name[1]);
+        names.add(name);
       }
     }
   }

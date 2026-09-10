@@ -74,9 +74,11 @@ function syncRedirects(): void {
     if (!trimmed || trimmed.startsWith('#')) continue;
 
     const parts = trimmed.split(/\s+/);
-    if (parts.length < 2) continue;
+    const [rawSource, rawDestination] = parts;
+    if (rawSource === undefined || rawDestination === undefined) continue;
 
-    let [source, destination] = parts;
+    let source = rawSource;
+    let destination = rawDestination;
 
     // Strip full URL sources to path only
     if (source.startsWith('http://') || source.startsWith('https://')) {

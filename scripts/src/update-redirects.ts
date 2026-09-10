@@ -16,6 +16,10 @@ if (process.argv.length < 4) {
 }
 
 const [redirects, versions] = process.argv.slice(2);
+assert(
+  redirects !== undefined && versions !== undefined,
+  'Usage: update-redirect <path to _redirects> <path to versions.json>'
+);
 assert.match(
   redirects,
   /_redirects$/,

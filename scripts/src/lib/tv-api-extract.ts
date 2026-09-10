@@ -51,7 +51,8 @@ function typeLiteralsOf(node: ts.TypeNode): ts.TypeLiteralNode[] {
     node.typeName.text === 'Readonly' &&
     node.typeArguments?.length === 1
   ) {
-    return typeLiteralsOf(node.typeArguments[0]);
+    const [inner] = node.typeArguments;
+    return inner ? typeLiteralsOf(inner) : [];
   }
   return [];
 }
@@ -119,22 +120,21 @@ function splitTags(raw: string) {
   for (const line of lines) {
     const platform = /^@platform\s+(.+)$/.exec(line);
     if (platform) {
-      platforms.push(...platform[1].split(/[,\s]+/).filter(Boolean));
+      platforms.push(...(platform[1] ?? '').split(/[,\s]+/).filter(Boolean));
       current = 'desc';
       continue;
     }
     const dep = /^@deprecated\s*(.*)$/.exec(line);
     if (dep) {
-      deprecated = dep[1].trim();
+      deprecated = (dep[1] ?? '').trim();
       current = 'deprecated';
       continue;
     }
     const other = /^@(\w+)\s*(.*)$/.exec(line);
     if (other) {
       // Keep @default and friends as plain prose; drop the tag marker.
-      description.push(
-        other[1] === 'default' ? `Defaults to ${other[2]}.` : other[2]
-      );
+      const [, tag, rest = ''] = other;
+      description.push(tag === 'default' ? `Defaults to ${rest}.` : rest);
       current = 'desc';
       continue;
     }

@@ -29,7 +29,7 @@ async function main() {
       const contents = buffer.toString('utf-8');
       let match;
       while ((match = imageReferenceRegExp.exec(contents))) {
-        const rawPath = match[1].replace(/^\//, '');
+        const rawPath = (match[1] ?? '').replace(/^\//, '');
         const imagePath = path.join('./', rawPath);
         assets.push({imagePath, markdownPath: file});
       }

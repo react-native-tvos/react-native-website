@@ -33,6 +33,9 @@ jobs:
       - name: Run packages lint
         run: yarn lint:packages
 
+      - name: Typecheck repository scripts
+        run: yarn typecheck:scripts
+
       - name: Run plugins lint
         run: yarn lint:plugins
 

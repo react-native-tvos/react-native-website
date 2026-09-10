@@ -1,4 +1,29 @@
 {
-  "extends": "@react-native/typescript-config/tsconfig.json",
-  "include": ["./src"],
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "display": "Repository scripts (Node)",
+  // Deliberately self-contained. These are Node ESM scripts run directly by
+  // `node scripts/src/*.ts`, not React Native app code, so they do not extend
+  // @react-native/typescript-config: that config sets "types": ["jest"] and a
+  // react-native resolution condition, and it is not a dependency of this
+  // workspace, so extending it silently resolved to nothing.
+  "compilerOptions": {
+    "target": "es2023",
+    "lib": ["es2023"],
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "types": ["node"],
+
+    "noEmit": true,
+    "allowImportingTsExtensions": true,
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "verbatimModuleSyntax": true,
+    "isolatedModules": true,
+
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "skipLibCheck": true
+  },
+  "include": ["./src"]
 }

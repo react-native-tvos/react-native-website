@@ -66,22 +66,22 @@ function npmDistTags(): Map<string, string> {
   const tags: Record<string, string> = JSON.parse(raw);
   const byVersion = new Map<string, string>();
   for (const [tag, version] of Object.entries(tags)) {
-    const match = /^(\d+\.\d+)-stable$/.exec(tag);
+    const match = /^(\d+\.\d+)-stable$/.exec(tag)?.[1];
     if (match) {
-      byVersion.set(match[1], version);
+      byVersion.set(match, version);
     }
   }
   return byVersion;
 }
 
 function matchOrThrow(text: string, re: RegExp, what: string): string {
-  const match = re.exec(text);
-  if (!match) {
+  const captured = re.exec(text)?.[1];
+  if (captured === undefined) {
     throw new Error(
       `Could not read ${what}. The source layout may have changed.`
     );
   }
-  return match[1];
+  return captured;
 }
 
 function readRelease(
