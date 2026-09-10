@@ -147,7 +147,7 @@ Two access modes, deliberately different:
 - **Working-tree read** for `types_generated/` only — it exists in no git ref. Guarded by asserting the directory exists and every file carries a `@generated SignedSource` header; a hand-edited or absent file fails with the `yarn build-types` remedy.
 - **Git-ref read** (`git -C <checkout> show <ref>:<path>`) for everything else, so a dirty or wrong-branch checkout cannot corrupt output.
 
-Also exports `assertRefPresent` (fails with the exact `git fetch` remedy; a sibling checkout is easily many days stale) and `assertIsTvBranch` (requires `Libraries/Components/TV/TVFocusGuideView.js` at the ref, so a `branch-v*` mistake fails loudly instead of emitting nothing).
+Also exports `assertRefPresent` (fails with the exact `git fetch` remedy; a sibling checkout is often many days stale) and `assertIsTvBranch` (requires `Libraries/Components/TV/TVFocusGuideView.js` at the ref, so a `branch-v*` mistake fails loudly instead of emitting nothing).
 
 ### `scripts/src/generate-tv-api.ts`
 
@@ -163,7 +163,7 @@ This split is the point of the design: the heavy `build-types` run produces pros
 
 ### `scripts/src/generate-tv-releases.ts`
 
-**In:** `npm view react-native-tvos dist-tags --json` for released versions (authoritative — see above), plus one `git show` per in-scope branch — now just `tvos-v0.86.0` and `tvos-v0.87.0`, plus `main` for next — for: `packages/react-native/package.json` → `peerDependencies.react`; `packages/react-native/gradle/libs.versions.toml` → `minSdk`/`targetSdk`/`compileSdk`/`ndkVersion`; `packages/react-native/scripts/cocoapods/helpers.rb` → `min_ios_version_supported`. Three refs, trivial cost.
+**In:** `npm view react-native-tvos dist-tags --json` for released versions (authoritative — see above), plus one `git show` per in-scope branch — now only `tvos-v0.86.0` and `tvos-v0.87.0`, plus `main` for next — for: `packages/react-native/package.json` → `peerDependencies.react`; `packages/react-native/gradle/libs.versions.toml` → `minSdk`/`targetSdk`/`compileSdk`/`ndkVersion`; `packages/react-native/scripts/cocoapods/helpers.rb` → `min_ios_version_supported`. Three refs, trivial cost.
 
 Never read the `name`/`version` fields from `package.json`: on `tvos-v0.87.0` `name` is `"react-native"` and `version` is `1000.0.0`-style placeholder data.
 
@@ -243,7 +243,7 @@ This also shrinks the repo sharply: `versioned_docs/` is 2358 files across 11 ve
 
 `website/src/components/releases/_releases-table.md` is a hand-maintained schedule table whose rows link core RN blog posts. Rebuild for TV release trains or remove the section.
 
-**Blog:** 95 posts, all core React Native announcements (2015–2026), plus `website/blog/authors.yml`. On a TV site they are someone else's release notes. Recommendation is to remove the blog and its navbar/footer entries; the alternative is keeping it clearly attributed as upstream. Open decision, recorded rather than assumed.
+**Blog:** 95 posts, all core React Native announcements (2015–2026), plus `website/blog/authors.yml`. On a TV site they are someone else's release notes. Recommendation is to remove the blog and its navbar/footer entries; the alternative is keeping it attributed as upstream. Open decision, recorded rather than assumed.
 
 **`packages/lint-examples/package.json`** pins `react-native@^0.87.1` and four `@react-native/*` packages for linting doc examples. Repoint to `react-native-tvos` so examples lint against the TV API.
 
@@ -264,7 +264,7 @@ This also shrinks the repo sharply: `versioned_docs/` is 2358 files across 11 ve
 
 ## Risks
 
-- **The generator depends on a build artifact, not a committed file, and has no fallback right now.** `types_generated/` requires the TV repo's toolchain (including an `@microsoft/api-extractor` patch). The obvious mitigation — read the artifacts from the published npm package — is unavailable, because a build error omitted them from `react-native-tvos@0.87.1-0`. So if the local `build-types` setup breaks, TV doc refreshes stall with nothing to fall back to. Two consequences: keep the committed partials as the source of truth for the site (a broken toolchain degrades to stale docs, not a broken build), and treat the npm packaging fix as the thing that retires this risk.
+- **The generator depends on a build artifact, not a committed file, and has no fallback right now.** `types_generated/` requires the TV repo's toolchain (including an `@microsoft/api-extractor` patch). The natural mitigation — read the artifacts from the published npm package — is unavailable, because a build error omitted them from `react-native-tvos@0.87.1-0`. So if the local `build-types` setup breaks, TV doc refreshes stall with nothing to fall back to. Two consequences: keep the committed partials as the source of truth for the site (a broken toolchain degrades to stale docs, not a broken build), and treat the npm packaging fix as the thing that retires this risk.
 - **Prose changes are invisible to the PR-time CI gate.** The cheap gate only sees the API surface via `ReactNativeApi.d.ts`. A reworded docblock upstream won't fail CI; the manifest's SignedSource hashes make it detectable, but only when someone re-runs the generator. The weekly job should cover this.
 - **0.86 prop tables are generated from `main`, not from `tvos-v0.86.0`.** This is the accepted stopgap. The drift between adjacent releases is small but not zero, so the 0.86 TV pages need a note saying prop tables track the latest release. Removing this compromise means per-branch `build-types` runs, which is worth doing only once the npm artifacts land.
 - The API sources disagree in places (`destinations` has three type spellings across files). The cross-check surfaces this rather than hiding it; expect an initial allowlist.

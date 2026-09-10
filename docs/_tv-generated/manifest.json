@@ -1,0 +1,23 @@
+{
+  "source": "https://github.com/react-native-tvos/react-native-tvos",
+  "ref": "main",
+  "commit": "e12ebc5cbe3377c5b6e523fbf5a218f72edd5fc2",
+  "inputs": {
+    "Libraries/Components/TV/TVViewPropTypes.d.ts": "fde9225b13476772c8c96111e1f19ad4",
+    "Libraries/Components/TV/TVFocusGuideView.d.ts": "a2f0ecf6916b4abe87871d3bd1c4b6d0",
+    "Libraries/Components/TV/TVEventControl.d.ts": "f1079e2fa2c323433ec94964948c67e2",
+    "Libraries/Components/TV/TVEventHandler.d.ts": "0806d7b2ac135d0304ea48a8b0bbd871",
+    "Libraries/Components/ScrollView/ScrollView.d.ts": "8ad7424567b06a0621a100d687872814"
+  },
+  "outputs": {
+    "tv-view-props": "Libraries/Components/TV/TVViewPropTypes.d.ts#TVViewProps",
+    "tv-parallax-properties": "Libraries/Components/TV/TVViewPropTypes.d.ts#TVParallaxPropertiesType",
+    "tv-focus-guide-view-props": "Libraries/Components/TV/TVFocusGuideView.d.ts#TVFocusGuideViewProps",
+    "tv-focus-guide-view-methods": "Libraries/Components/TV/TVFocusGuideView.d.ts#TVFocusGuideViewImperativeMethods",
+    "tv-event-control-methods": "Libraries/Components/TV/TVEventControl.d.ts#TVEventControl",
+    "tv-event-handler-methods": "Libraries/Components/TV/TVEventHandler.d.ts#TVEventHandlerType",
+    "tv-remote-event": "Libraries/Components/TV/TVEventHandler.d.ts#TVRemoteEvent",
+    "tv-remote-event-body": "Libraries/Components/TV/TVEventHandler.d.ts#TVRemoteEventBody",
+    "tv-scroll-view-props": "Libraries/Components/ScrollView/ScrollView.d.ts#ScrollViewBaseProps"
+  }
+}

@@ -1,0 +1,24 @@
+[
+  {
+    "version": "0.87",
+    "npmVersion": "0.87.1-0",
+    "branch": "tvos-v0.87.0",
+    "react": "^19.2.3",
+    "minTvos": "15.1",
+    "minSdk": "24",
+    "targetSdk": "36",
+    "compileSdk": "37",
+    "ndkVersion": "27.1.12297006"
+  },
+  {
+    "version": "0.86",
+    "npmVersion": "0.86.2-0",
+    "branch": "tvos-v0.86.0",
+    "react": "^19.2.3",
+    "minTvos": "15.1",
+    "minSdk": "24",
+    "targetSdk": "36",
+    "compileSdk": "36",
+    "ndkVersion": "27.1.12297006"
+  }
+]

@@ -24,6 +24,11 @@
     "update-lock": "npx yarn-deduplicate",
     "check-dependencies": "manypkg check",
     "sync-redirects:vercel": "node scripts/src/sync-vercel-redirects.ts",
+    "generate:tv-api": "node scripts/src/generate-tv-api.ts",
+    "generate:tv-releases": "node scripts/src/generate-tv-releases.ts",
+    "generate:tv": "yarn generate:tv-api && yarn generate:tv-releases",
+    "check:tv-api": "node scripts/src/generate-tv-api.ts --surface",
+    "check:tv-releases": "node scripts/src/generate-tv-releases.ts --check",
     "build:vercel": "yarn --cwd website build:vercel",
     "build:vercel:fast": "yarn --cwd website build:vercel:fast",
     "dev:vercel": "vercel dev"

@@ -1,0 +1,49 @@
+name: TV release metadata
+
+# Release metadata changes when react-native-tvos ships, not when someone edits
+# a doc page, so this does not run on pull requests. The fresh clone also means
+# it never reads a stale local checkout.
+on:
+  workflow_dispatch: {}
+  schedule:
+    - cron: "0 6 * * 1"
+
+permissions:
+  contents: read
+
+jobs:
+  check-tv-releases:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Checkout react-native-tvos
+        uses: actions/checkout@v6
+        with:
+          repository: react-native-tvos/react-native-tvos
+          path: .rntv
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+          cache: yarn
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Regenerate TV release metadata
+        env:
+          RNTV_REPO: .rntv
+        run: yarn generate:tv-releases
+
+      - name: Report drift
+        run: |
+          if [ -n "$(git status --porcelain -uall website/tv-releases.json website/releases/_tv-branches-table.md)" ]; then
+            git diff -- website/tv-releases.json website/releases/_tv-branches-table.md
+            echo "::error::TV release metadata is stale. Run 'yarn generate:tv-releases' and commit."
+            exit 1
+          fi

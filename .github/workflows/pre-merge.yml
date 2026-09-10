@@ -36,6 +36,39 @@ jobs:
       - name: Run plugins lint
         run: yarn lint:plugins
 
+  check-tv-api-surface:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      # Only the committed API snapshot is needed, so this is a shallow
+      # single-ref clone. Regenerating the partials would require a
+      # `yarn build-types` run in the TV repo, which is far too slow for a
+      # per-PR job; the surface check below catches the case that matters.
+      - name: Checkout react-native-tvos at the pinned commit
+        uses: actions/checkout@v6
+        with:
+          repository: react-native-tvos/react-native-tvos
+          ref: e12ebc5cbe3377c5b6e523fbf5a218f72edd5fc2
+          path: .rntv
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+          cache: yarn
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Check every shipped TV prop is documented
+        env:
+          RNTV_REPO: .rntv
+        run: yarn check:tv-api
+
   check-vercel-redirects:
     runs-on: ubuntu-latest
     steps:
