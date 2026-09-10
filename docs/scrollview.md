@@ -787,7 +787,7 @@ If this is a vertical ScrollView scrolls to the bottom. If this is a horizontal 
 
 Use `scrollToEnd({animated: true})` for smooth animated scrolling, `scrollToEnd({animated: false})` for immediate scrolling. If no options are passed, `animated` defaults to `true`.
 
-## TV props <div className="label tv">TV</div>
+## TV-specific props <div className="label tv">TV</div>
 
 On TV a `ScrollView` scrolls as a side effect of focus moving between its children, rather than from a drag. A scroll view whose content is not focusable therefore will not scroll at all — use [`TVTextScrollView`](tvtextscrollview.md) for long passages of text.
 
@@ -795,4 +795,4 @@ These props tune the animation that runs when focus moves to another item.
 
 <TVScrollViewProps />
 
-Per-item snapping also reads `scrollSnapAlign` and `scrollSnapOffset` from each child; both are listed in [View's TV props](view.md#tv-props).
+Per-item snapping also reads `scrollSnapAlign` and `scrollSnapOffset` from each child; both are listed in [View's TV-specific props](view.md#tv-specific-props-tv).

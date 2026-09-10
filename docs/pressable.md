@@ -270,7 +270,7 @@ Ripple effect configuration for the `android_ripple` property.
 | foreground | boolean                                           | No       | Set to true to add the ripple effect to the foreground of the view, instead of the background. This is useful if one of your child views has a background of its own, or you're e.g. displaying images, and you don't want the ripple to be covered by them. |
 | alpha      | number                                            | No       | Controls the opacity of the ripple. Accepts a value between `0.0` (fully transparent) and `1.0` (fully opaque). The value is applied on top of any alpha already present in the color.                                                                       |
 
-## TV focus props <div className="label tv">TV</div>
+## TV-specific props <div className="label tv">TV</div>
 
 On Apple TV and Android TV this component is focusable, and the remote's directional pad moves focus between it and its siblings. `onFocus` and `onBlur` fire as focus arrives and leaves, `onPress` fires when the select button is pressed, and `onPressIn` and `onPressOut` bracket that press. Use `onFocus` and `onBlur` to render the focused state — on a screen viewed from across a room it needs to be unmistakable.
 

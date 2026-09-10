@@ -152,7 +152,7 @@ TV next focus up (see documentation for the View component).
 
 A ref setter that will be assigned an [element node](element-nodes) when mounted.
 
-## TV focus props <div className="label tv">TV</div>
+## TV-specific props <div className="label tv">TV</div>
 
 On Apple TV and Android TV this component is focusable, and the remote's directional pad moves focus between it and its siblings. `onFocus` and `onBlur` fire as focus arrives and leaves, `onPress` fires when the select button is pressed, and `onPressIn` and `onPressOut` bracket that press. Use `onFocus` and `onBlur` to render the focused state — on a screen viewed from across a room it needs to be unmistakable.
 

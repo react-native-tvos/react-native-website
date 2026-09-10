@@ -816,7 +816,7 @@ This disables the 'layout-only view removal' optimization for this view!
 | ------ |
 | string |
 
-## TV props <div className="label tv">TV</div>
+## TV-specific props <div className="label tv">TV</div>
 
 On Apple TV and Android TV, `View` accepts props that control how the focus engine treats it and its children. A plain `View` is not focusable; these props matter when it wraps focusable content or participates in a scroll container.
 

@@ -47,8 +47,16 @@ type Target = {
   decl: string;
   /** When set, only these members are emitted, and all must exist. */
   only?: string[];
-  /** Heading shown above the table. */
+  /** What this partial documents; recorded in the generated header. */
   title: string;
+  /**
+   * How to lay the members out.
+   *
+   * `props` and `methods` mirror how the hand-written docs render each, as a
+   * heading per member. `table` suits plain object payloads, which the
+   * hand-written docs also render as a single table.
+   */
+  render: 'props' | 'methods' | 'table';
   /**
    * Where to take descriptions for members the primary declaration documents
    * with no doc comment. Some declarations carry the authoritative prop set
@@ -64,6 +72,7 @@ const TARGETS: Target[] = [
     file: `${TV}/TVViewPropTypes.d.ts`,
     decl: 'TVViewProps',
     title: 'TV props',
+    render: 'props',
   },
   {
     // Pressable declares its own TVProps: the focus props a focusable control
@@ -72,6 +81,7 @@ const TARGETS: Target[] = [
     file: PRESSABLE,
     decl: 'TVProps',
     title: 'TV focus props',
+    render: 'props',
     descriptionsFrom: {file: `${TV}/TVViewPropTypes.d.ts`, decl: 'TVViewProps'},
   },
   {
@@ -79,48 +89,56 @@ const TARGETS: Target[] = [
     file: `${TV}/TVViewPropTypes.d.ts`,
     decl: 'TVParallaxPropertiesType',
     title: 'TVParallaxProperties',
+    render: 'props',
   },
   {
     out: 'tv-focus-guide-view-props',
     file: `${TV}/TVFocusGuideView.d.ts`,
     decl: 'TVFocusGuideViewProps',
     title: 'TVFocusGuideView props',
+    render: 'props',
   },
   {
     out: 'tv-focus-guide-view-methods',
     file: `${TV}/TVFocusGuideView.d.ts`,
     decl: 'TVFocusGuideViewImperativeMethods',
     title: 'TVFocusGuideView methods',
+    render: 'methods',
   },
   {
     out: 'tv-text-scroll-view-props',
     file: `${TV}/TVTextScrollView.d.ts`,
     decl: 'TVTextScrollView',
     title: 'TVTextScrollView props',
+    render: 'props',
   },
   {
     out: 'tv-event-control-methods',
     file: `${TV}/TVEventControl.d.ts`,
     decl: 'TVEventControl',
     title: 'TVEventControl methods',
+    render: 'methods',
   },
   {
     out: 'tv-event-handler-methods',
     file: `${TV}/TVEventHandler.d.ts`,
     decl: 'TVEventHandlerType',
     title: 'TVEventHandler methods',
+    render: 'methods',
   },
   {
     out: 'tv-remote-event',
     file: `${TV}/TVEventHandler.d.ts`,
     decl: 'TVRemoteEvent',
     title: 'TVRemoteEvent',
+    render: 'table',
   },
   {
     out: 'tv-remote-event-body',
     file: `${TV}/TVEventHandler.d.ts`,
     decl: 'TVRemoteEventBody',
     title: 'TVRemoteEvent body',
+    render: 'table',
   },
   {
     out: 'tv-scroll-view-props',
@@ -133,6 +151,7 @@ const TARGETS: Target[] = [
       'snapToItemPadding',
     ],
     title: 'TV scroll props',
+    render: 'props',
   },
 ];
 
@@ -159,6 +178,36 @@ function platformBadges(platforms: string[]): string {
     .join(' ');
 }
 
+/**
+ * Escapes characters MDX would read as JSX, leaving inline code untouched.
+ *
+ * Doc comments are prose, so a bare `<` means less-than, not a tag. Escaping
+ * inside a code span would surface the entity to the reader, so code spans are
+ * passed through: MDX does not parse JSX there either.
+ */
+function escapeMdxProse(text: string): string {
+  return text
+    .split(/(`+[^`]*`+)/)
+    .map((part, index) =>
+      index % 2 === 1
+        ? part
+        : part.replace(/</g, '&lt;').replace(/\{/g, '&#123;')
+    )
+    .join('');
+}
+
+/** Description for an expanded section, or empty when upstream documents none. */
+function describeExpanded(member: Member): string {
+  const parts: string[] = [];
+  if (member.deprecated !== null) {
+    parts.push(`**Deprecated.** ${member.deprecated}`.trim());
+  }
+  if (member.description) {
+    parts.push(member.description);
+  }
+  return escapeMdxProse(parts.join('\n\n'));
+}
+
 function describe(member: Member): string {
   const parts: string[] = [];
   if (member.deprecated !== null) {
@@ -170,25 +219,95 @@ function describe(member: Member): string {
   return parts.join('\n') || '—';
 }
 
-function renderTable(target: Target, members: Member[]): string {
-  const rows = members.map(m => {
-    const name = platformBadges(m.platforms)
-      ? `\`${m.name}\` ${platformBadges(m.platforms)}`
-      : `\`${m.name}\``;
-    return `| ${name} | \`${cell(m.type)}\` | ${m.required ? 'Yes' : 'No'} | ${cell(describe(m))} |`;
-  });
+/** Splits `(params) => ret` out of a function type's text. */
+function signatureOf(name: string, type: string): string {
+  const match = /^\(?\((.*)\)\s*=>\s*(.+?)\)?$/s.exec(type);
+  if (!match) {
+    return `${name}()`;
+  }
+  const [, params = '', returns = 'void'] = match;
+  const suffix = returns === 'void' ? '' : `: ${returns}`;
+  return `${name}(${params})${suffix}`;
+}
+
+function generatedHeader(target: Target): string[] {
   // These partials are imported into MDX pages, so they are compiled as MDX.
   // HTML comments are a syntax error there; MDX expression comments are not.
   return [
-    `{/* @generated by scripts/src/generate-tv-api.ts from`,
-    `    react-native-tvos ${target.file} (${target.decl}).`,
+    `{/* @generated by scripts/src/generate-tv-api.ts — ${target.title}.`,
+    `    Source: react-native-tvos ${target.file} (${target.decl}).`,
     `    Do not edit by hand; run \`yarn generate:tv-api\`. */}`,
     '',
+  ];
+}
+
+/** One heading per prop, matching how the hand-written prop docs read. */
+function renderProps(target: Target, members: Member[]): string {
+  const sections = members.flatMap(member => {
+    const badges = platformBadges(member.platforms);
+    const heading = member.required
+      ? `### <div className="label required basic">Required</div>**\`${member.name}\`**`
+      : `### \`${member.name}\`${badges ? ` ${badges}` : ''}`;
+    const description = describeExpanded(member);
+    return [
+      heading,
+      '',
+      ...(description ? [description, ''] : []),
+      '| Type |',
+      '| ---- |',
+      `| \`${cell(member.type)}\` |`,
+      '',
+      '---',
+      '',
+    ];
+  });
+  return [...generatedHeader(target), ...sections].join('\n');
+}
+
+/** One heading per method, matching how the hand-written method docs read. */
+function renderMethods(target: Target, members: Member[]): string {
+  const sections = members.flatMap(member => {
+    const description = describeExpanded(member);
+    return [
+      `### \`${member.name}()\``,
+      '',
+      '```tsx',
+      signatureOf(member.name, member.type),
+      '```',
+      '',
+      ...(description ? [description, ''] : []),
+      '---',
+      '',
+    ];
+  });
+  return [...generatedHeader(target), ...sections].join('\n');
+}
+
+/** A single table, for plain object payloads. */
+function renderTable(target: Target, members: Member[]): string {
+  const rows = members.map(m => {
+    const badges = platformBadges(m.platforms);
+    const name = badges ? `\`${m.name}\` ${badges}` : `\`${m.name}\``;
+    return `| ${name} | \`${cell(m.type)}\` | ${m.required ? 'Yes' : 'No'} | ${cell(describe(m))} |`;
+  });
+  return [
+    ...generatedHeader(target),
     `| Name | Type | Required | Description |`,
     `| ---- | ---- | -------- | ----------- |`,
     ...rows,
     '',
   ].join('\n');
+}
+
+function render(target: Target, members: Member[]): string {
+  switch (target.render) {
+    case 'props':
+      return renderProps(target, members);
+    case 'methods':
+      return renderMethods(target, members);
+    case 'table':
+      return renderTable(target, members);
+  }
 }
 
 /** Member names already present in the committed partials. */
@@ -202,7 +321,12 @@ function documentedInCommittedPartials(): Set<string> {
       );
     }
     for (const line of fs.readFileSync(file, 'utf8').split('\n')) {
-      const name = /^\|\s*`([A-Za-z_$][\w$]*)`/.exec(line)?.[1];
+      // Matches both a table row and an expanded section heading.
+      const name =
+        /^\|\s*`([A-Za-z_$][\w$]*)`/.exec(line)?.[1] ??
+        /^###\s+(?:<div[^>]*>[^<]*<\/div>)?\s*\*{0,2}`([A-Za-z_$][\w$]*)\(?\)?`/.exec(
+          line
+        )?.[1];
       if (name) {
         names.add(name);
       }
@@ -287,7 +411,7 @@ async function main() {
     }
     members.forEach(m => documented.add(m.name));
 
-    const formatted = await prettier.format(renderTable(target, members), {
+    const formatted = await prettier.format(render(target, members), {
       ...prettierOptions,
       parser: 'markdown',
     });
