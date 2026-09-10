@@ -6,21 +6,21 @@ This is a local copy of the React Native website (Docusaurus 3.10 monorepo, remo
 
 **The headline finding: this site has no generation step today.** Every doc page, the release-branch table, the release schedule, and the showcase are hand-written and committed. `yarn start` runs `docusaurus start` with nothing before it. `website/releases/branches.md` even claims its values are "read from the tip of the corresponding `X-stable` branch" — no script does that; a human copies them in.
 
-So every generation script below is new. They are worth adding because the TV fork publishes machine-readable data the upstream site never wired up — in particular a per-branch TSDoc file carrying prose descriptions for every TV prop.
+So every generation script below is new. They are worth adding because the TV fork's TypeScript API is generated from its Flow source, and that generated output carries prose descriptions for every TV prop — machine-readable documentation the upstream site never wired up.
 
 ### Confirmed decisions
 
 | Decision      | Choice                                                                                                                  |
 | ------------- | ----------------------------------------------------------------------------------------------------------------------- |
 | Docs scope    | Keep all current docs. Add a TV Components / TV APIs section. Hand-annotate pages with significant TV behavior changes. |
-| Source access | Local sibling checkout `/Users/dlowder/iosProjects/react-native-tvos`                                                   |
+| Source access | Local sibling checkout of `react-native-tvos` (default `../react-native-tvos`)                                          |
 | Versions      | 0.86, 0.87, and `main` (next) only. Drop 0.77–0.85.                                                                     |
 | API source    | **Stopgap:** the already-generated `types_generated/` in the local `main` checkout. One ref, not per-branch.            |
 | Deploy target | Undecided — `url` becomes a marked placeholder, `baseUrl` stays `/`                                                     |
 
 ### Open item
 
-You are checking whether upstream doc content was generated elsewhere (possibly in the React Native repo) before being hand-committed. If it was, the Phase 3 annotation work should become a fork of that generator instead. Nothing else here depends on the answer.
+Unresolved: whether upstream doc content was generated elsewhere (possibly in the React Native repo) before being hand-committed here. If it was, the Phase 3 annotation work should become a fork of that generator instead. Nothing else in this plan depends on the answer.
 
 ---
 
@@ -120,7 +120,7 @@ Three new files under `scripts/src/`, matching the existing style in `scripts/sr
 
 ### Step 0 — the types are already generated (stopgap)
 
-`types_generated/` is gitignored, so it cannot be read from a git ref. **It has already been generated in the local `main` checkout**, so implementation can start immediately against `/Users/dlowder/iosProjects/react-native-tvos/packages/react-native/types_generated/`.
+`types_generated/` is gitignored, so it cannot be read from a git ref. **It has already been generated in the local `main` checkout**, so implementation can start immediately against `<checkout>/packages/react-native/types_generated/`.
 
 **One ref, not per-branch.** Every partial — including the ones snapshotted into `versioned_docs/version-0.86` — is generated from `main`. This is a deliberate stopgap while the npm artifacts are broken. Its cost: the 0.86 pages will show `main`'s props. Because 0.86 and 0.87 are adjacent releases the drift is small, but it is real, so the 0.86 TV pages should carry a short note saying the prop tables track the latest release. Revisit once npm ships the artifacts and per-version generation becomes cheap.
 
@@ -147,7 +147,7 @@ Two access modes, deliberately different:
 - **Working-tree read** for `types_generated/` only — it exists in no git ref. Guarded by asserting the directory exists and every file carries a `@generated SignedSource` header; a hand-edited or absent file fails with the `yarn build-types` remedy.
 - **Git-ref read** (`git -C <checkout> show <ref>:<path>`) for everything else, so a dirty or wrong-branch checkout cannot corrupt output.
 
-Also exports `assertRefPresent` (fails with the exact `git fetch` remedy — the checkout is currently 9 days stale) and `assertIsTvBranch` (requires `Libraries/Components/TV/TVFocusGuideView.js` at the ref, so a `branch-v*` mistake fails loudly instead of emitting nothing).
+Also exports `assertRefPresent` (fails with the exact `git fetch` remedy; a sibling checkout is easily many days stale) and `assertIsTvBranch` (requires `Libraries/Components/TV/TVFocusGuideView.js` at the ref, so a `branch-v*` mistake fails loudly instead of emitting nothing).
 
 ### `scripts/src/generate-tv-api.ts`
 
@@ -225,9 +225,9 @@ The generated types supply the descriptions for these props (`TVViewPropTypes.d.
 
 Worth noting: the generated `Pressable.d.ts` already carries the `nextFocus*` props, so `pressable.md` is missing documentation for props the API has shipped all along.
 
-### SnackPlayer — flagged, needs your call
+### SnackPlayer — open decision
 
-76 of 219 doc pages embed Expo Snack (171 blocks). Snack has no TV target and no D-pad, so every embed on this site demonstrates phone behavior. Options: leave them (fastest, quietly wrong for focus-related pages), strip them from TV-relevant pages only, or replace with static code blocks. Recommend the middle option — the remark plugin is at `plugins/remark-snackplayer/`. This is a content decision, not a technical blocker.
+76 of 219 doc pages embed Expo Snack (171 blocks). Snack has no TV target and no D-pad, so every embed on this site demonstrates phone behavior. Options: leave them (fastest, quietly wrong for focus-related pages), strip them from TV-relevant pages only, or replace with static code blocks. Recommendation is the middle option — the remark plugin is at `plugins/remark-snackplayer/`. This is a content decision, not a technical blocker.
 
 ---
 
@@ -243,7 +243,7 @@ This also shrinks the repo sharply: `versioned_docs/` is 2358 files across 11 ve
 
 `website/src/components/releases/_releases-table.md` is a hand-maintained schedule table whose rows link core RN blog posts. Rebuild for TV release trains or remove the section.
 
-**Blog:** 95 posts, all core React Native announcements (2015–2026), plus `website/blog/authors.yml`. On a TV site they are someone else's release notes. Recommend removing the blog and its navbar/footer entries; the alternative is keeping it clearly attributed as upstream. Your call — flagging rather than assuming.
+**Blog:** 95 posts, all core React Native announcements (2015–2026), plus `website/blog/authors.yml`. On a TV site they are someone else's release notes. Recommendation is to remove the blog and its navbar/footer entries; the alternative is keeping it clearly attributed as upstream. Open decision, recorded rather than assumed.
 
 **`packages/lint-examples/package.json`** pins `react-native@^0.87.1` and four `@react-native/*` packages for linting doc examples. Repoint to `react-native-tvos` so examples lint against the TV API.
 
