@@ -139,6 +139,7 @@ export default {
         ],
       },
     ],
+    'Platform Differences': ['platform-differences-pressable'],
     'Android and iOS guides': [
       {
         type: 'category',
