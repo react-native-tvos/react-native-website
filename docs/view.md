@@ -4,6 +4,7 @@ title: View
 ---
 
 import TVViewProps from './_tv-generated/tv-view-props.md';
+import TVFocusEvents from './_tv-generated/tv-focus-events.md';
 
 import ExperimentalAPIWarning from './\_experimental-api-warning.mdx';
 
@@ -821,5 +822,11 @@ This disables the 'layout-only view removal' optimization for this view!
 On Apple TV and Android TV, `View` accepts props that control how the focus engine treats it and its children. A plain `View` is not focusable; these props matter when it wraps focusable content or participates in a scroll container.
 
 <TVViewProps />
+
+### Focus events
+
+The focus engine reports arrival and departure through these callbacks. They fire only on a focusable view, so a plain `View` sees them only when `focusable` is set; a [`Pressable`](pressable.md) or `Touchable` is focusable already.
+
+<TVFocusEvents />
 
 See [Building for TV](building-for-tv.md) for how focus moves, and [`TVFocusGuideView`](tvfocusguideview.md) for redirecting focus into views the engine would otherwise skip.

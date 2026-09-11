@@ -3,8 +3,6 @@ id: pressable
 title: Pressable
 ---
 
-import TVFocusProps from './_tv-generated/tv-focus-props.md';
-
 Pressable is a Core Component wrapper that can detect various stages of press interactions on any of its defined children.
 
 ```tsx
@@ -274,8 +272,6 @@ Ripple effect configuration for the `android_ripple` property.
 
 On Apple TV and Android TV this component is focusable, and the remote's directional pad moves focus between it and its siblings. `onFocus` and `onBlur` fire as focus arrives and leaves, `onPress` fires when the select button is pressed, and `onPressIn` and `onPressOut` bracket that press. Use `onFocus` and `onBlur` to render the focused state — on a screen viewed from across a room it needs to be unmistakable.
 
-The focus engine picks the next view geometrically. The `nextFocus*` props override that choice for a given direction. On Apple TV the override is only consulted when a focusable view already exists in that direction.
-
-<TVFocusProps />
+Every TV prop this component accepts comes from `View`: the focus callbacks, `hasTVPreferredFocus` to claim initial focus, the `nextFocus*` overrides, and `tvParallaxProperties`. They are documented once, in [View's TV-specific props](view.md#tv-specific-props-tv).
 
 See [Building for TV](building-for-tv.md) for the wider focus model, and [`TVFocusGuideView`](tvfocusguideview.md) for reaching controls the engine would otherwise skip.

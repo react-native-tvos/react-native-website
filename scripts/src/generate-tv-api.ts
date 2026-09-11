@@ -36,7 +36,7 @@ const OUT_DIR = path.join(REPO_ROOT, 'docs', '_tv-generated');
 
 const TV = 'Libraries/Components/TV';
 const SCROLL_VIEW = 'Libraries/Components/ScrollView/ScrollView.d.ts';
-const PRESSABLE = 'Libraries/Components/Pressable/Pressable.d.ts';
+const VIEW_PROPS = 'Libraries/Components/View/ViewPropTypes.d.ts';
 
 type Target = {
   /** Output basename under docs/_tv-generated/. */
@@ -75,14 +75,14 @@ const TARGETS: Target[] = [
     render: 'props',
   },
   {
-    // Pressable declares its own TVProps: the focus props a focusable control
-    // accepts, including the focus/blur handlers that TVViewProps omits.
-    out: 'tv-focus-props',
-    file: PRESSABLE,
-    decl: 'TVProps',
-    title: 'TV focus props',
+    // Focus and blur are how a TV app observes the focus engine. They live on
+    // View via FocusEventProps, not in TVViewProps, so they need their own
+    // target; Pressable's local TVProps re-declares them but adds nothing.
+    out: 'tv-focus-events',
+    file: VIEW_PROPS,
+    decl: 'FocusEventProps',
+    title: 'TV focus event props',
     render: 'props',
-    descriptionsFrom: {file: `${TV}/TVViewPropTypes.d.ts`, decl: 'TVViewProps'},
   },
   {
     out: 'tv-parallax-properties',
