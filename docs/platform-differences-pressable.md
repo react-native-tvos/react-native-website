@@ -25,27 +25,27 @@ Core `Pressable` declares exactly the same event handlers at 0.81 and 0.87. Ever
 
 ## Event handlers on Pressable
 
-| Handler          | Mobile | TV  | Desktop | Notes                                  |
-| ---------------- | ------ | --- | ------- | -------------------------------------- |
-| `onPress`        | ✅     | ✅  | ✅      |                                        |
-| `onPressIn`      | ✅     | ✅  | ✅      | TV: fires on remote select down        |
-| `onPressOut`     | ✅     | ✅  | ✅      | TV: fires on remote select release     |
-| `onLongPress`    | ✅     | ✅  | ✅      |                                        |
-| `onPressMove`    | ✅     | ✅  | ✅      |                                        |
-| `onHoverIn`      | ✅     | ✅  | ✅      |                                        |
-| `onHoverOut`     | ✅     | ✅  | ✅      |                                        |
-| `onLayout`       | ✅     | ✅  | ✅      |                                        |
-| `onFocus`        | —      | ✅  | ✅      | Added independently by both forks      |
-| `onBlur`         | —      | ✅  | ✅      | Added independently by both forks      |
-| `onFocusCapture` | —      | ✅  | —       | TV only                                |
-| `onBlurCapture`  | —      | ✅  | —       | TV only                                |
-| `onKeyDown`      | —      | —   | ✅      | Desktop only; TV uses `TVEventHandler` |
-| `onKeyUp`        | —      | —   | ✅      | Desktop only                           |
-| `onDragEnter`    | —      | —   | ✅      | Desktop only                           |
-| `onDragLeave`    | —      | —   | ✅      | Desktop only                           |
-| `onDrop`         | —      | —   | ✅      | Desktop only                           |
+| Handler          | Mobile | TV  | Desktop | Notes                                              |
+| ---------------- | ------ | --- | ------- | -------------------------------------------------- |
+| `onPress`        | ✅     | ✅  | ✅      |                                                    |
+| `onPressIn`      | ✅     | ✅  | ✅      | TV: fires on remote select down                    |
+| `onPressOut`     | ✅     | ✅  | ✅      | TV: fires on remote select release                 |
+| `onLongPress`    | ✅     | ✅  | ✅      |                                                    |
+| `onPressMove`    | ✅     | ✅  | ✅      |                                                    |
+| `onHoverIn`      | ✅     | ✅  | ✅      |                                                    |
+| `onHoverOut`     | ✅     | ✅  | ✅      |                                                    |
+| `onLayout`       | ✅     | ✅  | ✅      |                                                    |
+| `onFocus`        | ✅     | ✅  | ✅      | Core inherits from `View`; both forks redeclare it |
+| `onBlur`         | ✅     | ✅  | ✅      | Core inherits from `View`; both forks redeclare it |
+| `onFocusCapture` | —      | ✅  | —       | TV only                                            |
+| `onBlurCapture`  | —      | ✅  | —       | TV only                                            |
+| `onKeyDown`      | —      | —   | ✅      | Desktop only; TV uses `TVEventHandler`             |
+| `onKeyUp`        | —      | —   | ✅      | Desktop only                                       |
+| `onDragEnter`    | —      | —   | ✅      | Desktop only                                       |
+| `onDragLeave`    | —      | —   | ✅      | Desktop only                                       |
+| `onDrop`         | —      | —   | ✅      | Desktop only                                       |
 
-The eight handlers shared by all three are the press and hover model inherited from core. Everything below them is a platform addition, and the two forks overlap on exactly `onFocus` and `onBlur`.
+A ✅ here means the prop is accepted, whether declared on `Pressable` itself or inherited through `ViewProps`. That distinction matters for `onFocus` and `onBlur`: core does not declare them on `Pressable`, but it does accept them from `View` and forward them to `Pressability`, as the [Pressability](#pressability) section shows. The forks redeclare them, which is where the type disagreement comes from.
 
 ## Other props on Pressable
 
@@ -81,12 +81,12 @@ Desktop has focus handlers but no `focused` flag, so a desktop app must track fo
 
 Presence is only half the problem. The shared handlers do not agree on their signatures.
 
-| Handler                            | Mobile 0.87       | TV 0.87           | Desktop 0.81                |
-| ---------------------------------- | ----------------- | ----------------- | --------------------------- |
-| `onPress` and friends              | `?(e) => unknown` | `?(e) => unknown` | `?(e) => mixed`             |
-| `onFocus` / `onBlur`               | —                 | `?(e) => mixed`   | `?(e) => void`              |
-| `onFocusCapture` / `onBlurCapture` | —                 | `?(e) => void`    | —                           |
-| `onDragEnter` / `onDrop`           | —                 | —                 | `(e) => void`, not nullable |
+| Handler                            | Mobile 0.87                  | TV 0.87           | Desktop 0.81                |
+| ---------------------------------- | ---------------------------- | ----------------- | --------------------------- |
+| `onPress` and friends              | `?(e) => unknown`            | `?(e) => unknown` | `?(e) => mixed`             |
+| `onFocus` / `onBlur`               | `?(e) => void` (from `View`) | `?(e) => mixed`   | `?(e) => void`              |
+| `onFocusCapture` / `onBlurCapture` | —                            | `?(e) => void`    | —                           |
+| `onDragEnter` / `onDrop`           | —                            | —                 | `(e) => void`, not nullable |
 
 Three things worth separating here:
 
@@ -114,11 +114,48 @@ The differences that matter for `Pressable`:
 
 This reframes the `Pressable` additions above. `onFocus`, `onBlur`, `onKeyDown`, and `onKeyUp` were already reachable on every platform through `ViewProps`; what each fork actually did was **redeclare** them on `Pressable` — and in doing so, changed their types. TV's redeclaration is what makes `onFocus` return `mixed` instead of `View`'s `void`.
 
+## Pressability
+
+`Pressable` is a thin wrapper over `Pressability`, which owns the gesture state machine. Some of what looks like a platform difference on `Pressable` turns out to live here, and some apparent gaps are not gaps at all.
+
+`PressabilityConfig` is what `Pressable` passes in:
+
+| Config handler                                                     | Mobile | TV  | Desktop |
+| ------------------------------------------------------------------ | ------ | --- | ------- |
+| `onPress`, `onPressIn`, `onPressOut`, `onPressMove`, `onLongPress` | ✅     | ✅  | ✅      |
+| `onHoverIn`, `onHoverOut`                                          | ✅     | ✅  | ✅      |
+| `onFocus`, `onBlur`                                                | ✅     | ✅  | ✅      |
+| `onKeyDown`, `onKeyUp`                                             | —      | —   | ✅      |
+| `onTVEvent`                                                        | —      | ✅  | —       |
+
+**Core `Pressability` has supported focus all along.** `onFocus` and `onBlur` are in its config on every platform, and core's `Pressable` destructures them from props and forwards them. Core never redeclared them on `PressableBaseProps`, because `ViewProps` already supplies them.
+
+`EventHandlers` is what `Pressability` returns for the underlying view to spread:
+
+| Attached handler                            | Mobile | TV  | Desktop |
+| ------------------------------------------- | ------ | --- | ------- |
+| `onBlur`, `onFocus`, `onClick`              | ✅     | ✅  | ✅      |
+| `onMouseEnter`, `onMouseLeave`              | ✅     | ✅  | ✅      |
+| `onPointerEnter`, `onPointerLeave`          | ✅     | ✅  | ✅      |
+| `onResponder*`, `onStartShouldSetResponder` | ✅     | ✅  | ✅      |
+| `onKeyDown`, `onKeyUp`                      | —      | —   | ✅      |
+| `onPressIn`, `onPressOut`                   | —      | ✅  | —       |
+
+`onTVEvent` is typed `?(event: any) => void`, the only untyped event payload across the three platforms.
+
+### On `onMouseEnter` and `onMouseLeave`
+
+These are often misread as a desktop addition, so they are worth stating plainly.
+
+All four sources — core 0.81, core 0.87, TV, and desktop — declare them identically in `Pressability`'s `EventHandlers`, and all four `Pressable` implementations omit them from `ViewProps` with the same `Omit<ViewProps, 'onMouseEnter' | 'onMouseLeave'>`. They are internal: `Pressability` attaches them to the underlying view and derives `onHoverIn` and `onHoverOut` from them. No platform accepts them as `Pressable` props.
+
+The `react-native-macos` documentation site lists them as `Pressable` props anyway. The cause is the legacy hand-maintained TypeScript types, not the macOS code: there `PressableProps` extends `Omit<ViewProps, 'children' | 'style' | 'hitSlop'>`, which does not exclude the mouse handlers, so they leak in from `ViewProps`. Core 0.81 declares that `Omit` exactly the same way, so macOS inherited this rather than introducing it, and core's move to types generated from Flow fixed it in 0.87 — the generated `PressableProps` carries the correct omission. `react-native-macos` picks the fix up when it rebases.
+
 ## Implications for a unified API
 
 The comparison suggests the divergence is narrower than it looks, and mostly accidental:
 
-1. **`onFocus` and `onBlur` need no new API.** All three platforms already declare them identically on `View`, down to the signature. The forks' `Pressable` redeclarations are the only source of disagreement, so deleting those redeclarations aligns the types without removing any functionality.
+1. **`onFocus` and `onBlur` need no new API, on any platform.** They are already in `PressabilityConfig` everywhere, already declared identically on `View` everywhere as `?(event) => void`, and core's `Pressable` already forwards them. The forks' `Pressable` redeclarations add no behavior; they only change the types. Deleting them aligns all three and loses nothing.
 2. **`focused` on `PressableStateCallbackType` is the one genuine gap.** It is the only focus-related capability a platform has that another cannot express, and it is useful anywhere focus exists — TV, desktop, and web.
 3. **Capture variants should be symmetric.** Desktop `View` is missing `onKeyDownCapture` and `onKeyUpCapture`; desktop `Pressable` is missing the focus capture variants that TV has.
 4. **Nullability and return types should be settled once.** `?(e) => void` for handlers whose result is ignored is the core convention; `mixed` and `unknown` appear only where a fork or an older core version diverged.
