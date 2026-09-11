@@ -140,6 +140,31 @@ The handlers the state machine returns for the underlying view to spread:
 
 `onTVEvent` is typed `?(event: any) => void`, the only untyped event payload across the four platforms.
 
+### Hover versus mouse enter and leave
+
+`onHoverIn` and `onMouseEnter` look like synonyms. They are not, on either platform that exposes both, and the difference is deliberate on each.
+
+**On native, `onMouseEnter` is the transport and `onHoverIn` is the API.** `Pressability` attaches `onMouseEnter` and `onMouseLeave` to the underlying view and derives the hover callbacks from them, adding three things the raw events do not have:
+
+- **Touch suppression.** The mouse path is wrapped in `isHoverEnabled()`, so a touch that synthesises mouse events does not produce a hover.
+- **Delays.** `delayHoverIn` and `delayHoverOut` schedule the callback, with each entry cancelling a pending exit and vice versa.
+- **State.** An internal `_isHovered` flag means `onHoverOut` only fires if a matching `onHoverIn` did.
+
+Which DOM-like events carry this is itself version-dependent. Behind the `shouldPressibilityUseW3CPointerEventsForHover` feature flag, `Pressability` switches to `onPointerEnter` and `onPointerLeave` and converts the payload back to a mouse event for the callback. The pointer path drops the `isHoverEnabled()` gate, because pointer events already report `pointerType`.
+
+**On web, the two are independent paths to the same element.** `onHoverIn` and `onHoverOut` are served by a separate `useHover` module that `Pressable` calls with `contain: true`, while `onMouseEnter` and `onMouseLeave` pass straight through to the DOM as ordinary React props. `useHover` adds:
+
+- **Touch suppression**, by checking `getPointerType(event) !== 'touch'` — the same intent as native's `isHoverEnabled()`, done with the information the event already carries.
+- **Containment**, so a hoverable nested inside another does not fire both.
+- **Respect for `disabled`**, which is passed into the hover config. A disabled `Pressable` still emits `onMouseEnter`.
+- **Pointer events where available**, falling back to `mouseenter` and `mouseleave` only when the browser lacks them.
+
+It attaches these imperatively as passive listeners rather than as React props, which is why they do not appear in the responder's `EventHandlers`.
+
+So on both platforms the rule is the same: **`onHoverIn` and `onHoverOut` describe a user hovering; `onMouseEnter` and `onMouseLeave` describe a mouse cursor crossing a boundary.** The first is filtered, stateful, and on native delayable; the second is raw. They diverge whenever input is touch, the component is disabled, or hoverables are nested.
+
+One consequence for a unified API: web has no `delayHoverIn` or `delayHoverOut`, and native has no hover containment or `onHoverChange`. Each has a capability the other lacks, and both are useful.
+
 ### On `onMouseEnter` and `onMouseLeave`
 
 These are often misread as a desktop addition, so they are worth stating plainly.
@@ -149,6 +174,8 @@ On all three native platforms they are internal. Core 0.81, core 0.87, TV, and d
 Web is the exception, and deliberately so: its `Pressable` omits only `children` and `style` from `ViewProps`, so `onMouseEnter` and `onMouseLeave` pass straight through to the DOM element alongside `onHoverIn` and `onHoverOut`.
 
 The `react-native-macos` documentation site also lists them as `Pressable` props, but for a different and less intentional reason. Its legacy hand-maintained `PressableProps` extends `Omit<ViewProps, 'children' | 'style' | 'hitSlop'>`, which does not exclude the mouse handlers, so they leak in from `ViewProps` even though the Flow source omits them. Core 0.81 declares that `Omit` exactly the same way, so macOS inherited the discrepancy rather than introducing it, and core's move to types generated from Flow fixed it in 0.87. `react-native-macos` picks the fix up when it rebases.
+
+A second inherited issue sits in the same code path. In the legacy mouse branch, `onMouseLeave` stores its delayed `onHoverOut` timer in `_hoverInDelayTimeout` rather than `_hoverOutDelayTimeout`. Because a subsequent `onMouseEnter` cancels only the hover-out slot, a pending delayed `onHoverOut` survives and fires after the pointer has already returned. Core 0.81 has the same line and core 0.87 corrects it, so this too resolves on rebase. It only bites when `delayHoverOut` is set.
 
 ## Handlers inherited from View
 
