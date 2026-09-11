@@ -25,10 +25,11 @@ const lastVersion = versions[0];
 const copyright = `Copyright © react-native-tvos contributors.`;
 
 /**
- * PLACEHOLDER: the deploy target for this site is not yet decided.
- * When it is, update this constant and `website/static/CNAME`.
+ * Where this site is served. Used for absolute URLs in structured data, social
+ * card images, and the search action. Deployed to EAS Hosting, which resolves
+ * the domain itself, so there is no CNAME file to keep in step.
  */
-const SITE_URL = 'https://tv.example.com';
+const SITE_URL = 'https://rntv.expo.app';
 
 /** Upstream repository that this site documents. */
 const TV_REPO_URL = 'https://github.com/react-native-tvos/react-native-tvos';
