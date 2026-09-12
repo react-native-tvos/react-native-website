@@ -74,6 +74,9 @@ const releasesSidebar: PropSidebar = [
 
 const Versions = () => {
   const currentVersion = versions.length > 0 ? versions[0] : null;
+  // Empty while this site has no archived snapshots of its own. Repopulating
+  // versionsArchived.json brings the section back.
+  const archivedVersions = Object.entries(versionsArchived);
   const latestVersions = ['next'].concat(
     versions.filter(version => version.indexOf('-RC') !== -1)
   );
@@ -133,35 +136,31 @@ const Versions = () => {
                 </tbody>
               </table>
             </div>
-            <h3>Archived versions</h3>
-            <p>
-              The documentation for unmaintained versions can be found on
-              website archive snapshots, hosted as separate sites.
-            </p>
-            <div className="table-wrapper">
-              <table className="versions">
-                <tbody>
-                  {Object.entries(versionsArchived).map(
-                    ([version, archivedDocumentationUrl]) => (
-                      <VersionItem
-                        key={'version_' + version}
-                        version={version}
-                        archivedDocumentationUrl={archivedDocumentationUrl}
-                        currentVersion={currentVersion}
-                      />
-                    )
-                  )}
-                </tbody>
-              </table>
-            </div>
-            <p>
-              The documentation for versions below <code>0.60</code> can be
-              found on the separate website called{' '}
-              <a href="https://archive.reactnative.dev/versions">
-                React Native Archive
-              </a>
-              .
-            </p>
+            {archivedVersions.length > 0 && (
+              <>
+                <h3>Archived versions</h3>
+                <p>
+                  The documentation for unmaintained versions can be found on
+                  website archive snapshots, hosted as separate sites.
+                </p>
+                <div className="table-wrapper">
+                  <table className="versions">
+                    <tbody>
+                      {archivedVersions.map(
+                        ([version, archivedDocumentationUrl]) => (
+                          <VersionItem
+                            key={'version_' + version}
+                            version={version}
+                            archivedDocumentationUrl={archivedDocumentationUrl}
+                            currentVersion={currentVersion}
+                          />
+                        )
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </>
+            )}
           </div>
         </DocRootLayout>
       </DocsSidebarProvider>
