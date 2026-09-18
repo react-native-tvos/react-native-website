@@ -857,3 +857,9 @@ Valid `params` keys are:
 
 - 'offset' (number) - The offset to scroll to. In case of `horizontal` being true, the offset is the x-value, in any other case the offset is the y-value. Required.
 - 'animated' (boolean) - Whether the list should do an animation while scrolling. Defaults to `true`.
+
+## TV focus behavior <div className="label tv">TV</div>
+
+On Apple TV and Android TV, this component wraps its contents in a [`TVFocusGuideView`](tvfocusguideview.md) with the `trapFocus*` props set according to the list's orientation. This keeps focus inside the list while rows are still virtualized, instead of letting it escape into whatever happens to be rendered at the time. Focus leaves the list once it reaches the first or last item.
+
+You do not need to add your own focus guide around the list. Rows should be focusable — a [`Pressable`](pressable.md) or [`TouchableOpacity`](touchableopacity.md) — since focus is what scrolls the list.

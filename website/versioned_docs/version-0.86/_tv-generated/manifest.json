@@ -1,0 +1,17 @@
+{
+  "package": "0.86-stable",
+  "version": "0.86.3-0",
+  "documents": "0.86",
+  "outputs": [
+    "tv-event-control-methods",
+    "tv-event-handler-methods",
+    "tv-focus-events",
+    "tv-focus-guide-view-methods",
+    "tv-focus-guide-view-props",
+    "tv-parallax-properties",
+    "tv-remote-event",
+    "tv-scroll-view-props",
+    "tv-text-scroll-view-props",
+    "tv-view-props"
+  ]
+}

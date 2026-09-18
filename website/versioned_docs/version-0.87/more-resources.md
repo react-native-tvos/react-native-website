@@ -32,7 +32,7 @@ We recommend using the [VS Code](https://code.visualstudio.com/) code editor and
 
 ## Example Apps
 
-Try out apps from the [Showcase](https://reactnative.dev/showcase) to see what React Native is capable of! Looking for something more hands on? Check out this [set of example apps on GitHub](https://github.com/ReactNativeNews/React-Native-Apps). You can look at their source code—try running one on a simulator or device.
+Looking for something hands on? The [RNTPTest example app](https://github.com/react-native-tvos/RNTPTest) and the [Expo TV examples](https://github.com/expo/examples) show working Apple TV and Android TV projects. You can look at their source code—try running one on a TV simulator or device.
 
 ## Find, make, and share your own Native Components and TurboModules
 

@@ -3,6 +3,8 @@ id: scrollview
 title: ScrollView
 ---
 
+import TVScrollViewProps from './_tv-generated/tv-scroll-view-props.md';
+
 Component that wraps platform ScrollView while providing integration with touch locking "responder" system.
 
 Keep in mind that ScrollViews must have a bounded height in order to work, since they contain unbounded-height children into a bounded container (via a scroll interaction). In order to bound the height of a ScrollView, either set the height of the view directly (discouraged) or make sure all parent views have bounded height. Forgetting to transfer `{flex: 1}` down the view stack can lead to errors here, which the element inspector makes quick to debug.
@@ -348,12 +350,10 @@ Determines when the keyboard should stay visible after a tap.
 - `'never'` tapping outside of the focused text input when the keyboard is up dismisses the keyboard. When this happens, children won't receive the tap.
 - `'always'`, the keyboard will not dismiss automatically, and the scroll view will not catch taps, but children of the scroll view can catch taps.
 - `'handled'`, the keyboard will not dismiss automatically when the tap was handled by children of the scroll view (or captured by an ancestor).
-- `false`, **_deprecated_**, use `'never'` instead
-- `true`, **_deprecated_**, use `'always'` instead
 
-| Type                                                      | Default   |
-| --------------------------------------------------------- | --------- |
-| enum(`'always'`, `'never'`, `'handled'`, `false`, `true`) | `'never'` |
+| Type                                     | Default   |
+| ---------------------------------------- | --------- |
+| enum(`'always'`, `'never'`, `'handled'`) | `'never'` |
 
 ---
 
@@ -786,3 +786,13 @@ scrollToEnd(options?: {animated?: boolean});
 If this is a vertical ScrollView scrolls to the bottom. If this is a horizontal ScrollView scrolls to the right.
 
 Use `scrollToEnd({animated: true})` for smooth animated scrolling, `scrollToEnd({animated: false})` for immediate scrolling. If no options are passed, `animated` defaults to `true`.
+
+## TV-specific props <div className="label tv">TV</div>
+
+On TV a `ScrollView` scrolls as a side effect of focus moving between its children, rather than from a drag. A scroll view whose content is not focusable therefore will not scroll at all — use [`TVTextScrollView`](tvtextscrollview.md) for long passages of text.
+
+These props tune the animation that runs when focus moves to another item.
+
+<TVScrollViewProps />
+
+Per-item snapping also reads `scrollSnapAlign` and `scrollSnapOffset` from each child; both are listed in [View's TV-specific props](view.md#tv-specific-props-tv).

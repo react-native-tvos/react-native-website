@@ -1,6 +1,8 @@
 {
-  "repo": "https://github.com/react-native-tvos/react-native-tvos",
-  "apiRef": "main",
-  "apiCommit": "e12ebc5cbe3377c5b6e523fbf5a218f72edd5fc2",
-  "versions": ["0.87", "0.86"]
+  "package": "react-native-tvos",
+  "next": "latest",
+  "versions": {
+    "0.87": "0.87-stable",
+    "0.86": "0.86-stable"
+  }
 }

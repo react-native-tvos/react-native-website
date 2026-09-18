@@ -122,7 +122,7 @@ If true, doesn't play Android system sound on press.
 
 ### `android_ripple` <div className="label android">Android</div>
 
-Enables the Android ripple effect and configures its properties.
+Enables the Android ripple effect and configures its properties. The `color` field accepts both plain colors and [`PlatformColor`](platformcolor) values, so you can reference theme attributes like `?attr/colorAccent`. When a `PlatformColor` is used, the ripple is automatically updated when the system configuration changes (for example, when switching between light and dark mode).
 
 | Type                                   |
 | -------------------------------------- |
@@ -260,9 +260,18 @@ Ripple effect configuration for the `android_ripple` property.
 
 **Properties:**
 
-| Name       | Type            | Required | Description                                                                                                                                                                                                                                                  |
-| ---------- | --------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| color      | [color](colors) | No       | Defines the color of the ripple effect.                                                                                                                                                                                                                      |
-| borderless | boolean         | No       | Defines if ripple effect should not include border.                                                                                                                                                                                                          |
-| radius     | number          | No       | Defines the radius of the ripple effect.                                                                                                                                                                                                                     |
-| foreground | boolean         | No       | Set to true to add the ripple effect to the foreground of the view, instead of the background. This is useful if one of your child views has a background of its own, or you're e.g. displaying images, and you don't want the ripple to be covered by them. |
+| Name       | Type                                              | Required | Description                                                                                                                                                                                                                                                  |
+| ---------- | ------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| color      | [color](colors) or [PlatformColor](platformcolor) | No       | Defines the color of the ripple effect.                                                                                                                                                                                                                      |
+| borderless | boolean                                           | No       | Defines if ripple effect should not include border.                                                                                                                                                                                                          |
+| radius     | number                                            | No       | Defines the radius of the ripple effect.                                                                                                                                                                                                                     |
+| foreground | boolean                                           | No       | Set to true to add the ripple effect to the foreground of the view, instead of the background. This is useful if one of your child views has a background of its own, or you're e.g. displaying images, and you don't want the ripple to be covered by them. |
+| alpha      | number                                            | No       | Controls the opacity of the ripple. Accepts a value between `0.0` (fully transparent) and `1.0` (fully opaque). The value is applied on top of any alpha already present in the color.                                                                       |
+
+## TV-specific props <div className="label tv">TV</div>
+
+On Apple TV and Android TV this component is focusable, and the remote's directional pad moves focus between it and its siblings. `onFocus` and `onBlur` fire as focus arrives and leaves, `onPress` fires when the select button is pressed, and `onPressIn` and `onPressOut` bracket that press. Use `onFocus` and `onBlur` to render the focused state — on a screen viewed from across a room it needs to be unmistakable.
+
+Every TV prop this component accepts comes from `View`: the focus callbacks, `hasTVPreferredFocus` to claim initial focus, the `nextFocus*` overrides, and `tvParallaxProperties`. They are documented once, in [View's TV-specific props](view.md#tv-specific-props-tv).
+
+See [Building for TV](building-for-tv.md) for the wider focus model, and [`TVFocusGuideView`](tvfocusguideview.md) for reaching controls the engine would otherwise skip.

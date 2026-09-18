@@ -293,15 +293,15 @@ Gestures, like panning or scrolling, and other events can map directly to animat
 For example, when working with horizontal scrolling gestures, you would do the following in order to map `event.nativeEvent.contentOffset.x` to `scrollX` (an `Animated.Value`):
 
 ```tsx
- onScroll={Animated.event(
-   // scrollX = e.nativeEvent.contentOffset.x
-   [{nativeEvent: {
-        contentOffset: {
-          x: scrollX
-        }
-      }
-    }]
- )}
+onScroll={Animated.event(
+  // scrollX = e.nativeEvent.contentOffset.x
+  [{
+    nativeEvent: {
+      contentOffset: { x: scrollX }
+    }
+  }],
+  {useNativeDriver: true}
+)}
 ```
 
 The following example implements a horizontal scrolling carousel where the scroll position indicators are animated using the `Animated.event` used in the `ScrollView`
@@ -338,15 +338,18 @@ const App = () => {
             horizontal={true}
             pagingEnabled
             showsHorizontalScrollIndicator={false}
-            onScroll={Animated.event([
-              {
-                nativeEvent: {
-                  contentOffset: {
-                    x: scrollX,
+            onScroll={Animated.event(
+              [
+                {
+                  nativeEvent: {
+                    contentOffset: {
+                      x: scrollX,
+                    },
                   },
                 },
-              },
-            ])}
+              ],
+              {useNativeDriver: true},
+            )}
             scrollEventThrottle={1}>
             {images.map((image, imageIndex) => {
               return (
@@ -459,7 +462,9 @@ const App = () => {
   const panResponder = useRef(
     PanResponder.create({
       onMoveShouldSetPanResponder: () => true,
-      onPanResponderMove: Animated.event([null, {dx: pan.x, dy: pan.y}]),
+      onPanResponderMove: Animated.event([null, {dx: pan.x, dy: pan.y}], {
+        useNativeDriver: false,
+      }),
       onPanResponderRelease: () => {
         Animated.spring(pan, {
           toValue: {x: 0, y: 0},
@@ -669,4 +674,4 @@ As mentioned [in the Direct Manipulation section](legacy/direct-manipulation), `
 
 We could use this in the Rebound example to update the scale - this might be helpful if the component that we are updating is deeply nested and hasn't been optimized with `shouldComponentUpdate`.
 
-If you find your animations with dropping frames (performing below 60 frames per second), look into using `setNativeProps` or `shouldComponentUpdate` to optimize them. Or you could run the animations on the UI thread rather than the JavaScript thread [with the useNativeDriver option](/blog/2017/02/14/using-native-driver-for-animated). You may also want to defer any computationally intensive work until after animations are complete, using the [InteractionManager](interactionmanager). You can monitor the frame rate by using the In-App Dev Menu "FPS Monitor" tool.
+If you find your animations with dropping frames (performing below 60 frames per second), look into using `setNativeProps` or `shouldComponentUpdate` to optimize them. Or you could run the animations on the UI thread rather than the JavaScript thread [with the useNativeDriver option](/blog/2017/02/14/using-native-driver-for-animated). You may also want to defer any computationally intensive work until the JS thread is idle (for example, with `requestIdleCallback`). You can monitor the frame rate by using the In-App Dev Menu "FPS Monitor" tool.

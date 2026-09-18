@@ -111,11 +111,23 @@ Returns a boolean which defines if device is an iPad.
 static isTV: boolean;
 ```
 
-Returns a boolean which defines if device is a TV.
+Returns a boolean which defines if device is a TV. True on both Apple TV and Android TV.
 
 | Type    |
 | ------- |
 | boolean |
+
+To single out Apple TV, combine it with `OS`:
+
+```tsx
+const isAppleTV = Platform.OS === 'ios' && Platform.isTV;
+```
+
+:::note
+
+A `Platform.isTVOS` property also exists at runtime on Apple TV, but it is not part of the [Strict TypeScript API](strict-typescript-api.md) that ships from 0.87 onward, so TypeScript will reject it. Use the `OS` check above instead.
+
+:::
 
 ---
 

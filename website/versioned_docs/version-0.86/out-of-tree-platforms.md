@@ -10,10 +10,11 @@ React Native is not only for Android and iOS devices - our partners and the comm
 - [React Native macOS](https://github.com/microsoft/react-native-macos) - React Native for macOS and Cocoa.
 - [React Native Windows](https://github.com/microsoft/react-native-windows) - React Native for Microsoft's Universal Windows Platform (UWP).
 - [React Native visionOS](https://github.com/callstack/react-native-visionos) - React Native for Apple's visionOS.
+- [React Native OpenHarmony](https://atomgit.com/CPF-RN/ohos_react_native) - React Native for OpenHarmony.
 
 **From Community**
 
-- [React Native tvOS](https://github.com/react-native-tvos/react-native-tvos) - React Native for Apple TV and Android TV devices.
+- [React Native](https://reactnative.dev) - React Native for Android and iOS devices.
 - [React Native Web](https://github.com/necolas/react-native-web) - React Native on the web using React DOM.
 - [React Native Skia](https://github.com/react-native-skia/react-native-skia) - React Native using [Skia](https://skia.org/) as a renderer. Currently supports Linux and macOS.
 

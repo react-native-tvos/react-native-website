@@ -192,11 +192,15 @@ const config: Config = {
           onlyIncludeVersions: isDeployPreview
             ? ['current', ...versions.slice(0, 2)]
             : undefined,
-          versions: {
-            [lastVersion]: {
-              badge: false, // Do not show version badge for last RN version
-            },
-          },
+          // Empty while cutting versions from scratch: indexing versions[0]
+          // would otherwise put an `undefined` key here and fail validation.
+          versions: lastVersion
+            ? {
+                [lastVersion]: {
+                  badge: false, // No version badge for the latest release
+                },
+              }
+            : {},
           ...commonDocsOptions,
         },
         blog: {

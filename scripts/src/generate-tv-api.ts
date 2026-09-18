@@ -21,21 +21,34 @@ import path from 'node:path';
 import prettier from 'prettier';
 
 import {
-  API_SNAPSHOT_PATH,
   REPO_ROOT,
+  fetchPackage,
   readGeneratedType,
+  readPackageFile,
   readSourceConfig,
-  resolveCheckout,
-  resolveCommit,
-  readAtRef,
-  existsAtRef,
+  TYPES_ENTRY,
+  type TvPackage,
 } from './lib/rntv-source.ts';
 import {extractMembers, parse, type Member} from './lib/tv-api-extract.ts';
 
-const OUT_DIR = path.join(REPO_ROOT, 'docs', '_tv-generated');
+/** Partials for the unreleased docs. */
+const NEXT_OUT_DIR = path.join(REPO_ROOT, 'docs', '_tv-generated');
+
+/** Partials for a released version's frozen docs. */
+function versionedOutDir(version: string): string {
+  return path.join(
+    REPO_ROOT,
+    'website',
+    'versioned_docs',
+    `version-${version}`,
+    '_tv-generated'
+  );
+}
 
 const TV = 'Libraries/Components/TV';
 const SCROLL_VIEW = 'Libraries/Components/ScrollView/ScrollView.d.ts';
+const PRESSABLE = 'Libraries/Components/Pressable/Pressable.d.ts';
+const CORE_EVENTS = 'Libraries/Types/CoreEventTypes.d.ts';
 const VIEW_PROPS = 'Libraries/Components/View/ViewPropTypes.d.ts';
 
 type Target = {
@@ -47,6 +60,11 @@ type Target = {
   decl: string;
   /** When set, only these members are emitted, and all must exist. */
   only?: string[];
+  /**
+   * Members emitted when present. Unlike `only`, absence is not an error:
+   * these were added in a later release than the oldest one documented.
+   */
+  optional?: string[];
   /** What this partial documents; recorded in the generated header. */
   title: string;
   /**
@@ -128,28 +146,18 @@ const TARGETS: Target[] = [
   },
   {
     out: 'tv-remote-event',
-    file: `${TV}/TVEventHandler.d.ts`,
+    file: CORE_EVENTS,
     decl: 'TVRemoteEvent',
     title: 'TVRemoteEvent',
-    render: 'table',
-  },
-  {
-    out: 'tv-remote-event-body',
-    file: `${TV}/TVEventHandler.d.ts`,
-    decl: 'TVRemoteEventBody',
-    title: 'TVRemoteEvent body',
     render: 'table',
   },
   {
     out: 'tv-scroll-view-props',
     file: SCROLL_VIEW,
     decl: 'ScrollViewBaseProps',
-    only: [
-      'scrollAnimationDuration',
-      'scrollAnimationEasing',
-      'scrollAnimationEnabled',
-      'snapToItemPadding',
-    ],
+    only: ['scrollAnimationEnabled', 'snapToItemPadding'],
+    // Added in 0.87; absent from 0.86.
+    optional: ['scrollAnimationDuration', 'scrollAnimationEasing'],
     title: 'TV scroll props',
     render: 'props',
   },
@@ -310,14 +318,14 @@ function render(target: Target, members: Member[]): string {
   }
 }
 
-/** Member names already present in the committed partials. */
-function documentedInCommittedPartials(): Set<string> {
+/** Member names present in a committed set of partials. */
+function documentedIn(outDir: string): Set<string> {
   const names = new Set<string>();
   for (const target of TARGETS) {
-    const file = path.join(OUT_DIR, `${target.out}.md`);
+    const file = path.join(outDir, `${target.out}.md`);
     if (!fs.existsSync(file)) {
       throw new Error(
-        `Missing docs/_tv-generated/${target.out}.md. Run \`yarn generate:tv-api\`.`
+        `Missing ${path.relative(REPO_ROOT, file)}. Run \`yarn generate:tv-api\`.`
       );
     }
     for (const line of fs.readFileSync(file, 'utf8').split('\n')) {
@@ -335,67 +343,128 @@ function documentedInCommittedPartials(): Set<string> {
   return names;
 }
 
+/** Every TV name the package's public entry point exports. */
+function exportedTvNames(pkg: TvPackage): string[] {
+  const entry = readPackageFile(pkg, TYPES_ENTRY);
+  const names = new Set<string>();
+  for (const match of entry.matchAll(
+    /\b(TV[A-Za-z0-9_]*|useTV[A-Za-z0-9_]*)\b/g
+  )) {
+    names.add(match[1]!);
+  }
+  return [...names].sort();
+}
+
 /**
- * Checks the shipped API against the committed partials, without regenerating.
+ * Fails when a TV member the package ships is documented nowhere.
  *
- * This is the CI gate. It needs only the committed ReactNativeApi.d.ts, read
- * from a git ref, so it runs without the `yarn build-types` output that full
- * generation requires and that is gitignored upstream.
+ * Reads the same published artifact the generator does, so the check needs no
+ * repository checkout. It compares member names rather than type names: the
+ * entry point re-exports types under names that differ from the declarations
+ * they come from.
  */
-function surfaceOnly(): void {
-  const config = readSourceConfig();
-  const repo = resolveCheckout(config);
-  crossCheck(repo, config.apiRef, documentedInCommittedPartials());
-  if (!process.exitCode) {
-    console.log(
-      `Every TV member in the public API appears in docs/_tv-generated.`
+function crossCheck(pkg: TvPackage, documented: Set<string>): void {
+  const allowPath = path.join(REPO_ROOT, 'scripts', 'tv-api-allowlist.json');
+  const allowed: string[] = fs.existsSync(allowPath)
+    ? JSON.parse(fs.readFileSync(allowPath, 'utf8')).undocumented
+    : [];
+
+  const missing: string[] = [];
+  for (const target of AUDIT) {
+    let members: Member[];
+    try {
+      members = extractMembers(
+        parse(target.file, readGeneratedType(pkg, target.file)),
+        target.decl
+      );
+    } catch {
+      console.warn(
+        `${pkg.label}: no '${target.decl}' in ${target.file}; it may have been renamed.`
+      );
+      continue;
+    }
+    for (const member of members) {
+      if (!documented.has(member.name) && !allowed.includes(member.name)) {
+        missing.push(`${target.decl}.${member.name}`);
+      }
+    }
+  }
+
+  // A TV export the entry point advertises but no target covers.
+  const covered = new Set(TARGETS.map(t => t.decl));
+  const uncovered = exportedTvNames(pkg).filter(
+    n => !covered.has(n) && !documented.has(n) && !allowed.includes(n)
+  );
+
+  if (missing.length > 0) {
+    console.error(
+      `${pkg.label}: these TV members ship in ${pkg.distTag} but appear in no ` +
+        `generated partial:\n` +
+        missing.map(m => `  - ${m}`).join('\n') +
+        `\n\nAdd them to a target in TARGETS, or record the omission in ` +
+        `scripts/tv-api-allowlist.json.`
+    );
+    process.exitCode = 1;
+  }
+  if (uncovered.length > 0) {
+    console.warn(
+      `${pkg.label}: exported TV names with no target: ${uncovered.join(', ')}`
     );
   }
 }
 
-async function main() {
-  if (process.argv.includes('--surface')) {
-    surfaceOnly();
-    return;
-  }
-  const check = process.argv.includes('--check');
-  const config = readSourceConfig();
-  const repo = resolveCheckout(config);
-  const commit = resolveCommit(repo, config.apiRef);
+/**
+ * Declarations whose members must all be documented.
+ *
+ * These are the generated declarations themselves, read from the package, so
+ * there is no rollup naming to compensate for.
+ */
+const AUDIT: {file: string; decl: string}[] = [
+  {file: `${TV}/TVViewPropTypes.d.ts`, decl: 'TVViewProps'},
+  {file: `${TV}/TVViewPropTypes.d.ts`, decl: 'TVParallaxPropertiesType'},
+  {file: `${TV}/TVFocusGuideView.d.ts`, decl: 'TVFocusGuideViewProps'},
+  {file: `${TV}/TVEventControl.d.ts`, decl: 'TVEventControl'},
+  {file: CORE_EVENTS, decl: 'TVRemoteEvent'},
+  {file: PRESSABLE, decl: 'TVProps'},
+];
 
+/** Generates one complete set of partials from one package. */
+async function generateSet(
+  pkg: TvPackage,
+  outDir: string,
+  check: boolean
+): Promise<void> {
   const prettierOptions = await prettier.resolveConfig(
-    path.join(OUT_DIR, 'x.md')
+    path.join(outDir, 'x.md')
   );
+  const sources = new Map<string, string>();
+  const read = (file: string) => {
+    if (!sources.has(file)) {
+      sources.set(file, readGeneratedType(pkg, file));
+    }
+    return sources.get(file)!;
+  };
 
-  const sources = new Map<string, ReturnType<typeof readGeneratedType>>();
-  const written: Record<string, string> = {};
+  fs.mkdirSync(outDir, {recursive: true});
   const documented = new Set<string>();
 
-  fs.mkdirSync(OUT_DIR, {recursive: true});
-
   for (const target of TARGETS) {
-    if (!sources.has(target.file)) {
-      sources.set(target.file, readGeneratedType(repo, target.file));
-    }
-    const source = sources.get(target.file)!;
     let members = extractMembers(
-      parse(target.file, source.text),
+      parse(target.file, read(target.file)),
       target.decl,
-      target.only
+      target.only,
+      target.optional
     );
     if (target.descriptionsFrom) {
       const from = target.descriptionsFrom;
-      if (!sources.has(from.file)) {
-        sources.set(from.file, readGeneratedType(repo, from.file));
-      }
-      const documented = new Map(
-        extractMembers(
-          parse(from.file, sources.get(from.file)!.text),
-          from.decl
-        ).map(m => [m.name, m])
+      const fallbacks = new Map(
+        extractMembers(parse(from.file, read(from.file)), from.decl).map(m => [
+          m.name,
+          m,
+        ])
       );
       members = members.map(member => {
-        const fallback = documented.get(member.name);
+        const fallback = fallbacks.get(member.name);
         if (member.description || !fallback?.description) {
           return member;
         }
@@ -415,36 +484,32 @@ async function main() {
       ...prettierOptions,
       parser: 'markdown',
     });
-    const outPath = path.join(OUT_DIR, `${target.out}.md`);
+    const outPath = path.join(outDir, `${target.out}.md`);
     const existing = fs.existsSync(outPath)
       ? fs.readFileSync(outPath, 'utf8')
       : null;
     if (existing !== formatted) {
       if (check) {
-        console.error(`Stale: docs/_tv-generated/${target.out}.md`);
+        console.error(`Stale: ${path.relative(REPO_ROOT, outPath)}`);
         process.exitCode = 1;
       } else {
         fs.writeFileSync(outPath, formatted);
       }
     }
-    written[target.out] = `${target.file}#${target.decl}`;
   }
 
   const manifest =
     JSON.stringify(
       {
-        source: config.repo,
-        ref: config.apiRef,
-        commit,
-        inputs: Object.fromEntries(
-          [...sources.values()].map(s => [s.relPath, s.signedSource])
-        ),
-        outputs: written,
+        package: pkg.distTag,
+        version: pkg.version,
+        documents: pkg.label,
+        outputs: TARGETS.map(t => t.out).sort(),
       },
       null,
       2
     ) + '\n';
-  const manifestPath = path.join(OUT_DIR, 'manifest.json');
+  const manifestPath = path.join(outDir, 'manifest.json');
   const existingManifest = fs.existsSync(manifestPath)
     ? fs.readFileSync(manifestPath, 'utf8')
     : null;
@@ -452,94 +517,55 @@ async function main() {
     fs.writeFileSync(manifestPath, manifest);
   }
 
-  crossCheck(repo, config.apiRef, documented);
+  crossCheck(pkg, documented);
+}
 
-  console.log(
-    `${check ? 'Checked' : 'Wrote'} ${TARGETS.length} TV partials from ` +
-      `${config.repo} @ ${commit.slice(0, 9)}`
-  );
+/** Every package this site documents, newest first. */
+function plannedSets(
+  config: ReturnType<typeof readSourceConfig>
+): {distTag: string; label: string; outDir: string}[] {
+  const sets = [{distTag: config.next, label: 'next', outDir: NEXT_OUT_DIR}];
+  for (const [version, distTag] of Object.entries(config.versions)) {
+    const outDir = versionedOutDir(version);
+    if (fs.existsSync(path.dirname(outDir))) {
+      sets.push({distTag, label: version, outDir});
+    }
+  }
+  return sets;
 }
 
 /**
- * Snapshot declarations whose members must all be documented.
+ * Verifies the committed partials against the packages, without regenerating.
  *
- * The snapshot contains BOTH the deprecated hand-maintained types and the
- * generated ones, and api-extractor disambiguates the collisions with `_N`
- * and `_default` suffixes. The generated side is authoritative, so these are
- * deliberately the suffixed names:
- *
- * - `TVRemoteEvent_2` is generated; `TVRemoteEvent` is the deprecated manual
- *   type, which still carries a `target` field the fork no longer emits.
- * - `TVEventControl_default` holds the members; `TVEventControl` is a
- *   `typeof` alias of it.
- *
- * Auditing the deprecated names instead reports props that no longer ship.
+ * This is the CI gate. It reads only the published entry point and type
+ * declarations, so it needs no repository checkout.
  */
-const SNAPSHOT_AUDIT = [
-  'TVViewProps',
-  'TVProps',
-  'TVFocusGuideViewProps',
-  'TVParallaxPropertiesType',
-  'TVRemoteEvent_2',
-  'TVRemoteEventBody',
-  'TVEventControl_default',
-];
+function surfaceOnly(): void {
+  const config = readSourceConfig();
+  for (const set of plannedSets(config)) {
+    const pkg = fetchPackage(config.package, set.distTag, set.label);
+    crossCheck(pkg, documentedIn(set.outDir));
+  }
+  if (!process.exitCode) {
+    console.log('Every TV member the packages ship appears in the docs.');
+  }
+}
 
-/**
- * Fails when the shipped API declares a TV member the docs never mention.
- *
- * ReactNativeApi.d.ts is committed, so this runs from a git ref with no
- * build-types run, which is what makes it usable as a cheap CI gate. It
- * compares member names rather than type names: the snapshot renames and
- * rolls up types (TVViewProps becomes TVProps, TVViewPropsIOS is a bare
- * alias), so type-name comparison is pure noise.
- *
- * The reverse direction is not checked. The snapshot omits `declare module`
- * augmentations and mangles identifiers, so a name absent from it proves
- * nothing.
- */
-function crossCheck(repo: string, ref: string, documented: Set<string>): void {
-  if (!existsAtRef(repo, ref, API_SNAPSHOT_PATH)) {
-    console.warn(
-      `No ${API_SNAPSHOT_PATH} at ${ref}; skipped the completeness check.`
-    );
+async function main() {
+  if (process.argv.includes('--surface')) {
+    surfaceOnly();
     return;
   }
-  const allowPath = path.join(REPO_ROOT, 'scripts', 'tv-api-allowlist.json');
-  const allowed: string[] = fs.existsSync(allowPath)
-    ? JSON.parse(fs.readFileSync(allowPath, 'utf8')).undocumented
-    : [];
+  const check = process.argv.includes('--check');
+  const config = readSourceConfig();
 
-  const snapshot = parse(
-    API_SNAPSHOT_PATH,
-    readAtRef(repo, ref, API_SNAPSHOT_PATH)
-  );
-
-  const missing: string[] = [];
-  for (const decl of SNAPSHOT_AUDIT) {
-    let members: Member[];
-    try {
-      members = extractMembers(snapshot, decl);
-    } catch {
-      console.warn(`Snapshot has no '${decl}'; it may have been renamed.`);
-      continue;
-    }
-    for (const member of members) {
-      if (!documented.has(member.name) && !allowed.includes(member.name)) {
-        missing.push(`${decl}.${member.name}`);
-      }
-    }
-  }
-
-  if (missing.length > 0) {
-    console.error(
-      `These TV members ship in the public API but appear in no generated ` +
-        `partial:\n` +
-        missing.map(m => `  - ${m}`).join('\n') +
-        `\n\nAdd them to a target in TARGETS, or record the omission in ` +
-        `scripts/tv-api-allowlist.json.`
+  for (const set of plannedSets(config)) {
+    const pkg = fetchPackage(config.package, set.distTag, set.label);
+    await generateSet(pkg, set.outDir, check);
+    console.log(
+      `${check ? 'Checked' : 'Wrote'} ${TARGETS.length} partials for ` +
+        `${set.label} from ${config.package}@${pkg.version}`
     );
-    process.exitCode = 1;
   }
 }
 

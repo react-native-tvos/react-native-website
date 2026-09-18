@@ -14,7 +14,7 @@ React Native is not only for Android and iOS devices - our partners and the comm
 
 **From Community**
 
-- [React Native tvOS](https://github.com/react-native-tvos/react-native-tvos) - React Native for Apple TV and Android TV devices.
+- [React Native](https://reactnative.dev) - React Native for Android and iOS devices.
 - [React Native Web](https://github.com/necolas/react-native-web) - React Native on the web using React DOM.
 - [React Native Skia](https://github.com/react-native-skia/react-native-skia) - React Native using [Skia](https://skia.org/) as a renderer. Currently supports Linux and macOS.
 

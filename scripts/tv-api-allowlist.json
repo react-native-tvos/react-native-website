@@ -1,0 +1,12 @@
+{
+  "_comment": "TV names exported by react-native-tvos that intentionally have no generated partial of their own. Each is either a component or hook whose props are documented under another target, or a bare alias. Removing a name here makes the completeness gate report it again.",
+  "undocumented": [
+    "TV",
+    "TVEventHandler",
+    "TVFocusGuideView",
+    "TVTextScrollView",
+    "TVEventControl",
+    "useTVEventHandler",
+    "TVViewPropsIOS"
+  ]
+}

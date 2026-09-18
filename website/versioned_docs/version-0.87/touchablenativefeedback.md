@@ -217,3 +217,11 @@ Creates an object that represents ripple drawable with specified color (as a str
 ```tsx
 static canUseNativeForeground(): boolean;
 ```
+
+## TV support <div className="label tv">TV</div>
+
+:::warning
+
+This component responds to press events but never receives focus, so it cannot be reached with a TV remote. Avoid it on Apple TV and Android TV; use [`Pressable`](pressable.md), [`TouchableOpacity`](touchableopacity.md), or [`TouchableHighlight`](touchablehighlight.md) instead, all of which are focusable.
+
+:::

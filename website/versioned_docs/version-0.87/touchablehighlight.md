@@ -213,3 +213,11 @@ Handy for snapshot tests.
 | Type |
 | ---- |
 | bool |
+
+## TV-specific props <div className="label tv">TV</div>
+
+On Apple TV and Android TV this component is focusable, and the remote's directional pad moves focus between it and its siblings. `onFocus` and `onBlur` fire as focus arrives and leaves, `onPress` fires when the select button is pressed, and `onPressIn` and `onPressOut` bracket that press. Use `onFocus` and `onBlur` to render the focused state — on a screen viewed from across a room it needs to be unmistakable.
+
+Every TV prop this component accepts comes from `View`: the focus callbacks, `hasTVPreferredFocus` to claim initial focus, the `nextFocus*` overrides, and `tvParallaxProperties`. They are documented once, in [View's TV-specific props](view.md#tv-specific-props-tv).
+
+See [Building for TV](building-for-tv.md) for the wider focus model, and [`TVFocusGuideView`](tvfocusguideview.md) for reaching controls the engine would otherwise skip.

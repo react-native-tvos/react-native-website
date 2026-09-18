@@ -18,7 +18,7 @@ Building an app for distribution in the App Store requires using the `Release` s
 To configure your app to be built using the `Release` scheme, go to **Product** → **Scheme** → **Edit Scheme**. Select the **Run** tab in the sidebar, then set the **Build Configuration** dropdown to `Release`.
 
 <ThemedImage
-alt="Docusaurus themed image"
+alt="Xcode Release Scheme configuration"
 sources={{
     light: '/docs/assets/ConfigureReleaseScheme.png',
     dark: '/docs/assets/ConfigureReleaseSchemeDark.png',

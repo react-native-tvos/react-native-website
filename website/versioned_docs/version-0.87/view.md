@@ -3,6 +3,9 @@ id: view
 title: View
 ---
 
+import TVViewProps from './_tv-generated/tv-view-props.md';
+import TVFocusEvents from './_tv-generated/tv-focus-events.md';
+
 import ExperimentalAPIWarning from './\_experimental-api-warning.mdx';
 
 The most fundamental component for building a UI, `View` is a container that supports layout with [flexbox](flexbox.md), [style](style.md), [some touch handling](handling-touches.md), and [accessibility](accessibility.md) controls. `View` maps directly to the native view equivalent on whatever platform React Native is running on, whether that is a `UIView`, `<div>`, `android.view`, etc.
@@ -813,3 +816,17 @@ This disables the 'layout-only view removal' optimization for this view!
 | Type   |
 | ------ |
 | string |
+
+## TV-specific props <div className="label tv">TV</div>
+
+On Apple TV and Android TV, `View` accepts props that control how the focus engine treats it and its children. A plain `View` is not focusable; these props matter when it wraps focusable content or participates in a scroll container.
+
+<TVViewProps />
+
+### Focus events
+
+The focus engine reports arrival and departure through these callbacks. They fire only on a focusable view, so a plain `View` sees them only when `focusable` is set; a [`Pressable`](pressable.md) or `Touchable` is focusable already.
+
+<TVFocusEvents />
+
+See [Building for TV](building-for-tv.md) for how focus moves, and [`TVFocusGuideView`](tvfocusguideview.md) for redirecting focus into views the engine would otherwise skip.

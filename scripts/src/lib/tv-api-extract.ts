@@ -171,13 +171,15 @@ function typeText(node: ts.TypeNode | undefined, sf: ts.SourceFile): string {
  * Members of the named declaration, alphabetically.
  *
  * `only`, when given, restricts output to those member names and asserts every
- * one of them was found — so a prop renamed upstream fails loudly instead of
- * vanishing from the docs.
+ * one was found — so a prop renamed upstream fails loudly instead of vanishing
+ * from the docs. `optional` names members that may legitimately be absent,
+ * because they were added in a later release than the one being read.
  */
 export function extractMembers(
   sf: ts.SourceFile,
   declName: string,
-  only?: string[]
+  only?: string[],
+  optional?: string[]
 ): Member[] {
   const typeNode = declaredTypeNode(sf, declName);
   assert(typeNode, `Declaration '${declName}' not found in ${sf.fileName}`);
@@ -195,7 +197,7 @@ export function extractMembers(
         continue;
       }
       const name = member.name.text;
-      if (only && !only.includes(name)) {
+      if (only && !only.includes(name) && !optional?.includes(name)) {
         continue;
       }
       const questionToken = (

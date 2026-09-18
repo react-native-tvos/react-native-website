@@ -73,6 +73,112 @@ export default App;
 
 ---
 
+### `backgroundImage`
+
+`backgroundImage` provides the ability to draw a [`linear-gradient()`](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Values/gradient/linear-gradient) and [`radial-gradient()`](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Values/gradient/radial-gradient) using a web-like syntax.
+
+```tsx
+// Simple usage:
+<View style={{ backgroundImage: 'linear-gradient(45deg, blue, red)' }} />
+
+<View style={{ backgroundImage: 'radial-gradient(ellipse farthest-corner at 30% 40%, red, blue)' }} />
+
+// Also with PlatformColor:
+<View
+style={{
+  backgroundImage: [
+    {
+      type: 'linear-gradient',
+      direction: 'to bottom',
+      colorStops: [
+        {
+          color: Platform.select({
+            ios: PlatformColor('systemTealColor'),
+            android: PlatformColor('@android:color/holo_purple'),
+            default: 'blue',
+          }),
+          positions: ['0%'],
+        },
+        {color: 'green', positions: ['100%']},
+      ],
+    },
+  ],
+}}
+/>
+```
+
+More complex examples of usage can be found in the RNTester app (with `PlatformColor` supports):
+
+- <a href={`https://github.com/react-native-tvos/react-native-tvos/blob/${getTvBranchNameForCurrentVersion()}/packages/rn-tester/js/examples/LinearGradient/LinearGradientExample.js`}>LinearGradientExample.js</a>
+- <a href={`https://github.com/react-native-tvos/react-native-tvos/blob/${getTvBranchNameForCurrentVersion()}/packages/rn-tester/js/examples/RadialGradient/RadialGradientExample.js`}>RadialGradientExample.js</a>
+
+| Type                                                                                                                                                                                               |
+| -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| string, array of objects: `{type: 'linear-gradient', direction: string, colorStops: object[] }`, `{type: 'radial-gradient', shape: string, position: object, size: string, colorStops: object[] }` |
+
+---
+
+### `backgroundPosition`
+
+Controls where the background gradient is placed inside the view. This is useful when `backgroundImage` is set, and you want to offset or center it instead of filling the full area.
+
+```tsx
+<View
+  style={{
+    backgroundImage: 'radial-gradient(circle, #ff6b6b, #4ecdc4)',
+    backgroundPosition: 'center',
+    backgroundRepeat: 'no-repeat',
+    backgroundSize: '50px 50px',
+  }}
+/>
+```
+
+| Type                                                                                    |
+| --------------------------------------------------------------------------------------- |
+| string \| array of objects `{top: string, left: string, right: string, bottom: string}` |
+
+---
+
+### `backgroundRepeat`
+
+Controls whether the background gradient is repeated, and how. This works together with `backgroundImage` to tile gradients across the view.
+
+```tsx
+<View
+  style={{
+    backgroundImage: 'linear-gradient(45deg, #ff6b6b, #4ecdc4)',
+    backgroundRepeat: 'repeat',
+    backgroundSize: '20px 20px',
+  }}
+/>
+```
+
+| Type                                                                                               |
+| -------------------------------------------------------------------------------------------------- |
+| enum(`'repeat'`, `'space'`, `'round'`, `'no-repeat'`) \| array of objects `{x: string, y: string}` |
+
+---
+
+### `backgroundSize`
+
+Controls the size of the background gradient. This is most useful when `backgroundImage` is set and the gradient should not fill the entire view by default.
+
+```tsx
+<View
+  style={{
+    backgroundImage: 'linear-gradient(90deg, #a8edea, #fed6e3)',
+    backgroundRepeat: 'no-repeat',
+    backgroundSize: '100px 100px',
+  }}
+/>
+```
+
+| Type                                                |
+| --------------------------------------------------- |
+| string \| array of objects `{x: number, y: number}` |
+
+---
+
 ### `borderBottomColor`
 
 | Type               |
@@ -348,103 +454,6 @@ Sets the elevation of a view, using Android's underlying [elevation API](https:/
 | Type   |
 | ------ |
 | number |
-
----
-
-### `experimental_backgroundImage`
-
-<ExperimentalAPIWarning />
-
-`experimental_backgroundImage` provides the ability to draw a [`linear-gradient()`](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Values/gradient/linear-gradient) ([0.76.x+](https://github.com/facebook/react-native/blob/main/CHANGELOG-0.7x.md#v0760)) and [`radial-gradient()`](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Values/gradient/radial-gradient) ([0.80.x+](https://github.com/facebook/react-native/blob/main/CHANGELOG.md#v0800)) using a web-like syntax.
-
-```tsx
-// Simple usage:
-<View style={{
-  experimental_backgroundImage: 'linear-gradient(45deg, blue, red)'
-}} />
-<View style={{
-  experimental_backgroundImage: 'radial-gradient(ellipse farthest-corner at 30% 40%, red, blue)'
-}} />
-```
-
-More complex examples of usage can be found in the RNTester app (with `PlatformColor` supports):
-
-- <a href={`https://github.com/react-native-tvos/react-native-tvos/blob/${getTvBranchNameForCurrentVersion()}/packages/rn-tester/js/examples/LinearGradient/LinearGradientExample.js`}>LinearGradientExample.js</a>
-- <a href={`https://github.com/react-native-tvos/react-native-tvos/blob/${getTvBranchNameForCurrentVersion()}/packages/rn-tester/js/examples/RadialGradient/RadialGradientExample.js`}>RadialGradientExample.js</a>
-
-| Type                                                                                                                                                                                               |
-| -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| string, array of objects: `{type: 'linear-gradient', direction: string, colorStops: object[] }`, `{type: 'radial-gradient', shape: string, position: object, size: string, colorStops: object[] }` |
-
----
-
-### `experimental_backgroundPosition`
-
-<ExperimentalAPIWarning />
-
-Controls where the background gradient is placed inside the view. This is useful when `experimental_backgroundImage` is set, and you want to offset or center it instead of filling the full area.
-
-```tsx
-<View
-  style={{
-    experimental_backgroundImage:
-      'radial-gradient(circle, #ff6b6b, #4ecdc4)',
-    experimental_backgroundPosition: 'center',
-    experimental_backgroundRepeat: 'no-repeat',
-    experimental_backgroundSize: '50px 50px',
-  }}
-/>
-```
-
-| Type                                                                                    |
-| --------------------------------------------------------------------------------------- |
-| string \| array of objects `{top: string, left: string, right: string, bottom: string}` |
-
----
-
-### `experimental_backgroundRepeat`
-
-<ExperimentalAPIWarning />
-
-Controls whether the background gradient is repeated, and how. This works together with `experimental_backgroundImage` to tile gradients across the view.
-
-```tsx
-<View
-  style={{
-    experimental_backgroundImage:
-      'linear-gradient(45deg, #ff6b6b, #4ecdc4)',
-    experimental_backgroundRepeat: 'repeat',
-    experimental_backgroundSize: '20px 20px',
-  }}
-/>
-```
-
-| Type                                                                                               |
-| -------------------------------------------------------------------------------------------------- |
-| enum(`'repeat'`, `'space'`, `'round'`, `'no-repeat'`) \| array of objects `{x: string, y: string}` |
-
----
-
-### `experimental_backgroundSize`
-
-<ExperimentalAPIWarning />
-
-Controls the size of the background gradient. This is most useful when `experimental_backgroundImage` is set and the gradient should not fill the entire view by default.
-
-```tsx
-<View
-  style={{
-    experimental_backgroundImage:
-      'linear-gradient(90deg, #a8edea, #fed6e3)',
-    experimental_backgroundRepeat: 'no-repeat',
-    experimental_backgroundSize: '100px 100px',
-  }}
-/>
-```
-
-| Type                                                |
-| --------------------------------------------------- |
-| string \| array of objects `{x: number, y: number}` |
 
 ---
 

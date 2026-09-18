@@ -20,11 +20,11 @@ Also, we have [`Platform.constants.reactNativeVersion`](platform#constants) in o
 ```tsx
 import {ReactNativeVersion} from 'react-native';
 
-const version = ReactNativeVersion.getVersionString(); // 0.86.3
+const version = ReactNativeVersion.getVersionString(); // 0.88.1
 const {major, minor, patch, prerelease} = ReactNativeVersion;
 major; // 0
-minor; // 86
-patch; // 3
+minor; // 88
+patch; // 1
 prerelease; // null
 ```
 
